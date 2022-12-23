@@ -1,0 +1,26 @@
+{
+  "name": "simple-drag-n-drop",
+  "version": "0.0.1",
+  "private": false,
+  "files": ["dist"],
+  "main": "./dist/simple-drag-drop.umd.js",
+  "module": "./dist/simple-drag-drop.es.js",
+  "exports": {
+    ".": {
+      "import": "./dist/simple-drag-drop.es.js",
+      "require": "./dist/simple-drag-drop.umd.js"
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.2.45"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.0.0",
+    "vite": "^4.0.0"
+  }
+}
