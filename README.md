@@ -1,5 +1,3 @@
-> Note that this required skipping the native `transferData` event property entirely in favor of a global variable that maintains the current drag transfer info. This could theoretically break some extreme edge cases involving multiple drag events occurring simultaneously, but I think it's very unlikely, or maybe even impossible. Feedback is greatly appreciated.
-
 # vue3-drag-drop
 
 
