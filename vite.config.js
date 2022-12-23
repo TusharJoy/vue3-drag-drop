@@ -7,8 +7,8 @@ export default defineConfig({
   build: {
     lib: {
       entry: path.resolve(__dirname, "src/components/index.js"),
-      name: "simple-drag-drop",
-      fileName: (format) => `simple-drag-drop.${format}.js`,
+      name: "vue3-drag-drop",
+      fileName: (format) => `vue3-drag-drop.${format}.js`,
     },
     rollupOptions: {
       external: ["vue"],

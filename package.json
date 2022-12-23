@@ -1,14 +1,14 @@
 {
-  "name": "simple-drag-n-drop",
+  "name": "vue3-drag-drop",
   "version": "0.0.1",
   "private": false,
   "files": ["dist"],
-  "main": "./dist/simple-drag-drop.umd.js",
-  "module": "./dist/simple-drag-drop.es.js",
+  "main": "./dist/vue3-drag-drop.umd.js",
+  "module": "./dist/vue3-drag-drop.es.js",
   "exports": {
     ".": {
-      "import": "./dist/simple-drag-drop.es.js",
-      "require": "./dist/simple-drag-drop.umd.js"
+      "import": "./dist/vue3-drag-drop.es.js",
+      "require": "./dist/vue3-drag-drop.umd.js"
     }
   },
   "scripts": {
