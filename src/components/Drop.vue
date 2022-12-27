@@ -11,8 +11,8 @@
 </template>
 
 <script>
-import transferDataStore from "@/helpers/transferDataStore";
-import { events } from "@/helpers/constants";
+import transferDataStore from "../helpers/transferDataStore";
+import { events } from "../helpers/constants";
 const insideElements = new Set();
 export default {
   data() {

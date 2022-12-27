@@ -1,5 +1,5 @@
-import Drag from "./components/Drag.vue";
-import Drop from "./components/Drop.vue";
+import Drag from "./Drag.vue";
+import Drop from "./Drop.vue";
 
 const SimpleDragDrop = {
   install(Vue) {

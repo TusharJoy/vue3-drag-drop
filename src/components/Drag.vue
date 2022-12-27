@@ -17,8 +17,8 @@
 </template>
 
 <script>
-import transferDataStore from "@/helpers/transferDataStore";
-import { dropEffects, effectsAllowed, events } from "@/helpers/constants";
+import transferDataStore from "../helpers/transferDataStore";
+import { dropEffects, effectsAllowed, events } from "../helpers/constants";
 export default {
   props: {
     draggable: { type: Boolean, default: true },

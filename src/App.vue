@@ -1,25 +1,11 @@
-<script setup></script>
+<script setup>
+import { Drag, Drop } from "./components/index";
+</script>
 
 <template>
   <header>
-    <Drag>
-      <img
-        alt="Vue logo"
-        class="logo"
-        src="./assets/logo.svg"
-        width="125"
-        height="125"
-      />
-    </Drag>
-    <Drop>
-      <img
-        alt="Vue logo"
-        class="logo"
-        src="./assets/logo.svg"
-        width="125"
-        height="125"
-      />
-    </Drop>
+    <Drag> DRAG ME </Drag>
+    <Drop> Drop me </Drop>
     <div class="wrapper">hi</div>
   </header>
 
