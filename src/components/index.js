@@ -1,3 +1,4 @@
+import "../helpers/DragDropTouch";
 import Drag from "./Drag.vue";
 import Drop from "./Drop.vue";
 
