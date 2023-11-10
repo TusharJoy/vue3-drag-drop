@@ -2,7 +2,9 @@
   "name": "vue3-drag-drop",
   "version": "1.0.0",
   "private": false,
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "main": "./dist/vue3-drag-drop.umd.js",
   "module": "./dist/vue3-drag-drop.es.js",
   "exports": {
@@ -16,6 +18,16 @@
     "build": "vite build",
     "preview": "vite preview"
   },
+  "keywords": [
+    "Javscript",
+    "drag",
+    "drop",
+    "Vue3",
+    "resize",
+    "drag&drop",
+    "plugin",
+    "Vue"
+  ],
   "dependencies": {
     "vue": "^3.2.45"
   },
