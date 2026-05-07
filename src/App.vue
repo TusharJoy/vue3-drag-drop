@@ -88,6 +88,13 @@ function fileIcon(type) {
   if (type.includes("pdf"))      return "📄";
   return "📎";
 }
+
+// ── Custom drag ghost ──
+const ghostDemoDropped = ref(null);
+
+function onGhostDrop(data) {
+  ghostDemoDropped.value = `Dropped: "${data.label}" (${data.ghostType} ghost)`;
+}
 </script>
 
 <template>
@@ -223,7 +230,43 @@ function fileIcon(type) {
           <p class="section-desc">Compare the browser's default drag ghost with a custom HTML ghost via the <code>image</code> slot.</p>
         </div>
         <div class="section-body">
-          <!-- Task 5 content goes here -->
+          <div class="ghost-demo">
+            <div class="ghost-col">
+              <p class="ghost-label">Default browser ghost</p>
+              <Drag
+                :transfer-data="{ label: 'Default ghost', ghostType: 'default' }"
+                class="drag-item ghost-item"
+              >
+                🖱 Drag me (default)
+              </Drag>
+              <p class="ghost-desc">The browser generates a screenshot of the element as the ghost.</p>
+            </div>
+
+            <div class="ghost-divider">vs</div>
+
+            <div class="ghost-col">
+              <p class="ghost-label">Custom HTML ghost via <code>image</code> slot</p>
+              <Drag
+                :transfer-data="{ label: 'Custom ghost', ghostType: 'custom' }"
+                class="drag-item ghost-item"
+              >
+                ✨ Drag me (custom)
+                <template v-slot:image>
+                  <div class="drag-ghost custom-ghost-preview">
+                    ✨ Custom ghost
+                  </div>
+                </template>
+              </Drag>
+              <p class="ghost-desc">The <code>image</code> slot renders off-screen HTML used as the drag image.</p>
+            </div>
+          </div>
+
+          <Drop
+            class="drop-zone ghost-drop"
+            @drop="onGhostDrop"
+          >
+            <p class="empty-hint">{{ ghostDemoDropped ?? 'Drop either item here' }}</p>
+          </Drop>
         </div>
       </section>
 
@@ -415,4 +458,16 @@ body {
 .file-size { color: #64748b; font-size: 0.8rem; }
 .file-status { font-size: 0.75rem; font-weight: 700; color: #16a34a; }
 .file-entry.rejected .file-status { color: #dc2626; }
+
+/* ── Ghost demo ── */
+.ghost-demo { display: grid; grid-template-columns: 1fr auto 1fr; gap: 1.5rem; align-items: start; margin-bottom: 1rem; }
+.ghost-col { display: flex; flex-direction: column; gap: 0.75rem; }
+.ghost-label { font-size: 0.8rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; }
+.ghost-label code { text-transform: none; }
+.ghost-desc { font-size: 0.8rem; color: #94a3b8; }
+.ghost-desc code { font-family: monospace; background: #f1f5f9; padding: 1px 5px; border-radius: 4px; font-size: 0.75rem; color: #6366f1; }
+.ghost-divider { font-weight: 800; color: #cbd5e1; font-size: 1rem; padding-top: 2rem; text-align: center; }
+.ghost-item { font-size: 0.9rem; }
+.ghost-drop { min-height: 80px; justify-content: center; }
+.custom-ghost-preview { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
 </style>
