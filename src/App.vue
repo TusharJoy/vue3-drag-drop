@@ -63,7 +63,7 @@ function kanbanDrop(targetColId, card) {
                 v-slot="{ transferData }"
                 class="drop-zone kanban-drop"
                 :class="{ over: transferData }"
-                @drop="(card) => kanbanDrop(col.id, card)"
+                @drop="(droppedCard) => kanbanDrop(col.id, droppedCard)"
               >
                 <Drag
                   v-for="card in col.cards"
@@ -260,6 +260,7 @@ body {
 
 /* ── Kanban ── */
 .kanban-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+@media (max-width: 600px) { .kanban-board { grid-template-columns: 1fr; } }
 .kanban-col-header { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.75rem; border-top: 3px solid; border-radius: 8px 8px 0 0; background: #f8fafc; margin-bottom: 0.5rem; }
 .kanban-col-label { font-size: 0.8rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; }
 .kanban-badge { color: white; font-size: 0.7rem; font-weight: 700; padding: 1px 7px; border-radius: 999px; }
