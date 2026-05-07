@@ -1,304 +1,223 @@
 <script setup>
 import { ref } from "vue";
 import { Drag, Drop } from "./components/index";
-
-const items = ref([
-  { id: 1, label: "Apple", type: "fruit", color: "#ef4444" },
-  { id: 2, label: "Banana", type: "fruit", color: "#eab308" },
-  { id: 3, label: "Carrot", type: "vegetable", color: "#f97316" },
-  { id: 4, label: "Broccoli", type: "vegetable", color: "#22c55e" },
-  { id: 5, label: "Report.pdf", type: "file", color: "#6366f1" },
-]);
-
-const fruitBasket = ref([]);
-const vegBasket = ref([]);
-const lastDropped = ref(null);
-
-function dropOnFruits(data) {
-  if (data.type === "fruit" && !fruitBasket.value.find((i) => i.id === data.id)) {
-    fruitBasket.value.push(data);
-    lastDropped.value = `Added ${data.label} to fruit basket`;
-  } else if (data.type !== "fruit") {
-    lastDropped.value = `Rejected: ${data.label} is not a fruit`;
-  }
-}
-
-function dropOnVeggies(data) {
-  if (data.type === "vegetable" && !vegBasket.value.find((i) => i.id === data.id)) {
-    vegBasket.value.push(data);
-    lastDropped.value = `Added ${data.label} to veggie basket`;
-  } else if (data.type !== "vegetable") {
-    lastDropped.value = `Rejected: ${data.label} is not a vegetable`;
-  }
-}
-
-function guardFruits(data, nativeEvent) {
-  if (data?.type !== "fruit") nativeEvent.dataTransfer.dropEffect = "none";
-}
-
-function guardVeggies(data, nativeEvent) {
-  if (data?.type !== "vegetable") nativeEvent.dataTransfer.dropEffect = "none";
-}
-
-const eventLog = ref([]);
-const MAX_LOG = 8;
-
-function logEvent(name, data) {
-  eventLog.value.unshift({ name, label: data?.label ?? "—", ts: Date.now() });
-  if (eventLog.value.length > MAX_LOG) eventLog.value.pop();
-}
-
-const cloneMode = ref(false);
-const sourceList = ref([
-  { id: 101, label: "Widget A" },
-  { id: 102, label: "Widget B" },
-  { id: 103, label: "Widget C" },
-]);
-const targetList = ref([]);
-
-function handleListDrop(item) {
-  if (!targetList.value.find((i) => i.id === item.id)) {
-    targetList.value.push({ ...item });
-  }
-  if (!cloneMode.value) {
-    sourceList.value = sourceList.value.filter((i) => i.id !== item.id);
-  }
-}
 </script>
 
 <template>
-  <div class="app">
-    <h1>vue3-drag-drop demo</h1>
-    <p class="subtitle">Drag items into the correct basket. Files are rejected by both.</p>
+  <div class="page">
+    <!-- Header -->
+    <header class="site-header">
+      <div class="header-inner">
+        <div class="header-brand">
+          <span class="brand-name">vue3-drag-drop</span>
+          <span class="brand-version">v1.2.0</span>
+        </div>
+        <p class="header-tagline">Simple, lightweight drag and drop for Vue 3 using the native HTML Drag and Drop API.</p>
+        <div class="header-links">
+          <a href="https://github.com/TusharJoy/vue3-drag-drop" target="_blank" class="btn btn-ghost">GitHub</a>
+          <a href="https://www.npmjs.com/package/vue3-drag-drop" target="_blank" class="btn btn-primary">npm install</a>
+        </div>
+      </div>
+    </header>
 
-    <div class="layout">
-      <!-- Draggable items -->
-      <section class="panel">
-        <h2>Items</h2>
-        <div class="item-list">
-          <Drag
-            v-for="item in items"
-            :key="item.id"
-            :transfer-data="item"
-            class="drag-item"
-            :style="{ borderColor: item.color }"
-            @dragstart="(d) => logEvent('dragstart', d)"
-            @dragend="(d) => logEvent('dragend', d)"
-          >
-            <span class="dot" :style="{ background: item.color }"></span>
-            {{ item.label }}
-            <span class="type-badge">{{ item.type }}</span>
-            <template v-slot:image>
-              <div class="drag-ghost" :style="{ background: item.color }">
-                {{ item.label }}
-              </div>
-            </template>
-          </Drag>
+    <!-- Main content -->
+    <main class="main">
+
+      <!-- Section 1: Kanban Board -->
+      <section class="demo-section" id="kanban">
+        <div class="section-header">
+          <h2>Kanban Board</h2>
+          <p class="section-desc">Drag cards between columns. Demonstrates multi-drop-zone state management.</p>
+        </div>
+        <div class="section-body">
+          <!-- Task 2 content goes here -->
         </div>
       </section>
 
-      <!-- Fruit basket -->
-      <section class="panel">
-        <h2>Fruit Basket</h2>
-        <Drop
-          v-slot="{ transferData }"
-          class="drop-zone"
-          :class="{
-            'over-valid': transferData?.type === 'fruit',
-            'over-invalid': transferData && transferData.type !== 'fruit',
-          }"
-          @dragover="guardFruits"
-          @dragenter="(d) => logEvent('dragenter', d)"
-          @dragleave="(d) => logEvent('dragleave', d)"
-          @drop="dropOnFruits"
-        >
-          <!-- Always visible: shows drag-over feedback even after items are present -->
-          <p v-if="transferData" class="drag-hint">
-            {{ transferData.type === 'fruit' ? '✓ Drop it!' : '✗ Fruits only' }}
-          </p>
-          <p v-else-if="fruitBasket.length === 0" class="empty-hint">Drop fruits here</p>
-          <div
-            v-for="item in fruitBasket"
-            :key="item.id"
-            class="basket-item"
-            :style="{ borderColor: item.color }"
-          >
-            <span class="dot" :style="{ background: item.color }"></span>
-            {{ item.label }}
-          </div>
-        </Drop>
+      <!-- Section 2: Sortable List -->
+      <section class="demo-section" id="sortable">
+        <div class="section-header">
+          <h2>Sortable List</h2>
+          <p class="section-desc">Drag to reorder items within a single list.</p>
+        </div>
+        <div class="section-body">
+          <!-- Task 3 content goes here -->
+        </div>
       </section>
 
-      <!-- Veggie basket -->
-      <section class="panel">
-        <h2>Veggie Basket</h2>
-        <Drop
-          v-slot="{ transferData }"
-          class="drop-zone"
-          :class="{
-            'over-valid': transferData?.type === 'vegetable',
-            'over-invalid': transferData && transferData.type !== 'vegetable',
-          }"
-          @dragover="guardVeggies"
-          @dragenter="(d) => logEvent('dragenter', d)"
-          @dragleave="(d) => logEvent('dragleave', d)"
-          @drop="dropOnVeggies"
-        >
-          <p v-if="transferData" class="drag-hint">
-            {{ transferData.type === 'vegetable' ? '✓ Drop it!' : '✗ Veggies only' }}
-          </p>
-          <p v-else-if="vegBasket.length === 0" class="empty-hint">Drop veggies here</p>
-          <div
-            v-for="item in vegBasket"
-            :key="item.id"
-            class="basket-item"
-            :style="{ borderColor: item.color }"
-          >
-            <span class="dot" :style="{ background: item.color }"></span>
-            {{ item.label }}
-          </div>
-        </Drop>
+      <!-- Section 3: File Drop Zone -->
+      <section class="demo-section" id="files">
+        <div class="section-header">
+          <h2>File Drop Zone</h2>
+          <p class="section-desc">Drop real files from your OS. Images accepted; other types rejected.</p>
+        </div>
+        <div class="section-body">
+          <!-- Task 4 content goes here -->
+        </div>
       </section>
-    </div>
 
-    <!-- Event log -->
-    <section class="event-log-section">
-      <h2>Event Log</h2>
-      <div class="event-log">
-        <div v-if="eventLog.length === 0" class="log-empty">Drag something to see events fire</div>
-        <div v-for="entry in eventLog" :key="entry.ts" class="log-entry">
-          <span class="log-name">{{ entry.name }}</span>
-          <span class="log-label">{{ entry.label }}</span>
+      <!-- Section 4: Custom Drag Ghost -->
+      <section class="demo-section" id="ghost">
+        <div class="section-header">
+          <h2>Custom Drag Ghost</h2>
+          <p class="section-desc">Compare the browser's default drag ghost with a custom HTML ghost via the <code>image</code> slot.</p>
         </div>
-      </div>
-    </section>
+        <div class="section-body">
+          <!-- Task 5 content goes here -->
+        </div>
+      </section>
 
-    <!-- Move vs Clone demo -->
-    <section class="list-demo-section">
-      <div class="list-demo-header">
-        <h2>Move vs Clone</h2>
-        <label class="toggle">
-          <input type="checkbox" v-model="cloneMode" />
-          Clone mode (keep in source)
-        </label>
-      </div>
-      <div class="list-demo-layout">
-        <div class="list-panel">
-          <h3>Source</h3>
-          <div class="item-list">
-            <Drag
-              v-for="item in sourceList"
-              :key="item.id"
-              :transfer-data="item"
-              class="drag-item"
-            >
-              {{ item.label }}
-            </Drag>
-            <p v-if="sourceList.length === 0" class="empty-hint">All moved</p>
-          </div>
+      <!-- Section 5: Toggle Draggable -->
+      <section class="demo-section" id="toggle">
+        <div class="section-header">
+          <h2>Toggle Draggable</h2>
+          <p class="section-desc">Enable or disable individual items using the <code>:draggable</code> prop.</p>
         </div>
-        <div class="list-arrow">→</div>
-        <div class="list-panel">
-          <h3>Target</h3>
-          <Drop
-            v-slot="{ transferData }"
-            class="drop-zone"
-            :class="{ 'over-valid': transferData }"
-            @drop="handleListDrop"
-          >
-            <p v-if="targetList.length === 0 && !transferData" class="empty-hint">Drop here</p>
-            <div
-              v-for="item in targetList"
-              :key="item.id"
-              class="basket-item"
-            >
-              {{ item.label }}
-            </div>
-          </Drop>
+        <div class="section-body">
+          <!-- Task 6 content goes here -->
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Status log -->
-    <p v-if="lastDropped" class="status">{{ lastDropped }}</p>
+      <!-- Section 6: Move vs Clone -->
+      <section class="demo-section" id="move-clone">
+        <div class="section-header">
+          <h2>Move vs Clone</h2>
+          <p class="section-desc">Toggle between moving items (removed from source) and cloning them (kept in source).</p>
+        </div>
+        <div class="section-body">
+          <!-- Task 7 content goes here -->
+        </div>
+      </section>
+
+      <!-- Section 7: Event Log -->
+      <section class="demo-section" id="events">
+        <div class="section-header">
+          <h2>Event Log</h2>
+          <p class="section-desc">All 7 drag events fire in real-time. Drag anything on this page to see them.</p>
+        </div>
+        <div class="section-body">
+          <!-- Task 8 content goes here -->
+        </div>
+      </section>
+
+      <!-- Section 8: Typed Drop Zones -->
+      <section class="demo-section" id="typed">
+        <div class="section-header">
+          <h2>Typed Drop Zones</h2>
+          <p class="section-desc">Drop zones that inspect <code>transferData</code> during <code>dragover</code> to accept or reject specific types.</p>
+        </div>
+        <div class="section-body">
+          <!-- Task 9 content goes here -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      <a href="https://github.com/TusharJoy/vue3-drag-drop" target="_blank">GitHub</a>
+      <span>·</span>
+      <a href="https://www.npmjs.com/package/vue3-drag-drop" target="_blank">npm</a>
+      <span>·</span>
+      <span>MIT License</span>
+    </footer>
   </div>
 </template>
 
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: system-ui, sans-serif; background: #f8fafc; color: #1e293b; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-.app { max-width: 900px; margin: 0 auto; padding: 2rem 1rem; }
-h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; }
-.subtitle { color: #64748b; margin-bottom: 2rem; }
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #f8fafc;
+  color: #1e293b;
+  line-height: 1.5;
+}
 
-.layout { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; }
+/* ── Page layout ── */
+.page { min-height: 100vh; display: flex; flex-direction: column; }
+.main { flex: 1; max-width: 960px; margin: 0 auto; width: 100%; padding: 2rem 1.5rem; display: flex; flex-direction: column; gap: 2rem; }
 
-.panel h2 { font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; }
+/* ── Header ── */
+.site-header {
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 2rem 1.5rem;
+}
+.header-inner { max-width: 960px; margin: 0 auto; }
+.header-brand { display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 0.5rem; }
+.brand-name { font-size: 1.5rem; font-weight: 800; color: #1e293b; letter-spacing: -0.02em; }
+.brand-version { font-size: 0.8rem; font-weight: 600; color: #6366f1; background: #eef2ff; padding: 2px 8px; border-radius: 999px; }
+.header-tagline { color: #64748b; font-size: 0.95rem; margin-bottom: 1rem; max-width: 560px; }
+.header-links { display: flex; gap: 0.75rem; }
 
-.item-list { display: flex; flex-direction: column; gap: 0.5rem; }
+/* ── Buttons ── */
+.btn { display: inline-flex; align-items: center; padding: 0.45rem 1rem; border-radius: 8px; font-size: 0.875rem; font-weight: 600; text-decoration: none; transition: background 0.15s, color 0.15s; }
+.btn-primary { background: #6366f1; color: white; }
+.btn-primary:hover { background: #4f46e5; }
+.btn-ghost { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+.btn-ghost:hover { background: #e2e8f0; }
 
+/* ── Demo sections ── */
+.demo-section {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+.section-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+.section-header h2 { font-size: 1rem; font-weight: 700; color: #1e293b; margin-bottom: 0.25rem; }
+.section-desc { font-size: 0.85rem; color: #64748b; }
+.section-desc code { font-family: monospace; background: #f1f5f9; padding: 1px 5px; border-radius: 4px; font-size: 0.8rem; color: #6366f1; }
+.section-body { padding: 1.5rem; }
+
+/* ── Shared drag primitives ── */
 .drag-item {
-  display: flex; align-items: center; gap: 0.5rem;
-  padding: 0.6rem 0.75rem; border-radius: 8px;
-  border: 2px solid transparent; background: white;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  cursor: grab; user-select: none;
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.6rem 0.875rem; border-radius: 8px;
+  background: white; border: 1.5px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  cursor: grab; user-select: none; font-size: 0.9rem; font-weight: 500;
+  transition: box-shadow 0.15s, border-color 0.15s;
 }
+.drag-item:hover { box-shadow: 0 2px 6px rgba(0,0,0,0.1); border-color: #cbd5e1; }
 .drag-item:active { cursor: grabbing; }
-
-.dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-
-.type-badge {
-  margin-left: auto; font-size: 0.7rem; font-weight: 500;
-  padding: 2px 6px; border-radius: 999px;
-  background: #f1f5f9; color: #64748b;
-}
+.drag-item.disabled { opacity: 0.4; cursor: not-allowed; }
 
 .drop-zone {
-  min-height: 180px; border-radius: 10px; border: 2px dashed #cbd5e1;
-  background: white; padding: 1rem;
-  display: flex; flex-direction: column; gap: 0.5rem;
+  min-height: 100px; border-radius: 10px;
+  border: 2px dashed #cbd5e1; background: #f8fafc;
+  padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem;
   transition: border-color 0.15s, background 0.15s;
 }
+.drop-zone.over { border-color: #6366f1; background: #eef2ff; }
 .drop-zone.over-valid { border-color: #22c55e; background: #f0fdf4; }
 .drop-zone.over-invalid { border-color: #ef4444; background: #fef2f2; }
 
-.empty-hint { color: #94a3b8; font-size: 0.9rem; text-align: center; margin: auto; }
-.drag-hint { font-size: 0.9rem; font-weight: 600; text-align: center; margin: auto; }
+.empty-hint { color: #94a3b8; font-size: 0.875rem; text-align: center; margin: auto; }
+.drag-hint { font-size: 0.875rem; font-weight: 600; text-align: center; margin: auto; }
 .drop-zone.over-valid .drag-hint { color: #16a34a; }
 .drop-zone.over-invalid .drag-hint { color: #dc2626; }
 
-.basket-item {
-  display: flex; align-items: center; gap: 0.5rem;
-  padding: 0.5rem 0.75rem; border-radius: 6px;
-  border: 2px solid transparent; background: #f8fafc;
-}
+.dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 
 .drag-ghost {
-  padding: 6px 12px; border-radius: 6px;
-  color: white; font-weight: 600; font-size: 0.875rem;
+  padding: 6px 14px; border-radius: 8px;
+  color: white; font-weight: 700; font-size: 0.875rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
-.status {
-  margin-top: 1.5rem; padding: 0.75rem 1rem; border-radius: 8px;
-  background: #f1f5f9; color: #475569; font-size: 0.9rem;
-  border-left: 3px solid #6366f1;
+/* ── Footer ── */
+.site-footer {
+  text-align: center; padding: 1.5rem;
+  font-size: 0.8rem; color: #94a3b8;
+  border-top: 1px solid #e2e8f0;
+  display: flex; justify-content: center; gap: 0.75rem;
 }
-
-.event-log-section { margin-top: 2rem; }
-.event-log-section h2 { font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; }
-.event-log { display: flex; flex-direction: column; gap: 0.25rem; font-family: monospace; font-size: 0.8rem; }
-.log-empty { color: #94a3b8; }
-.log-entry { display: flex; gap: 1rem; padding: 0.25rem 0.5rem; border-radius: 4px; background: #f8fafc; }
-.log-name { color: #6366f1; font-weight: 700; min-width: 100px; }
-.log-label { color: #475569; }
-
-.list-demo-section { margin-top: 2rem; }
-.list-demo-header { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 0.75rem; }
-.list-demo-header h2 { font-size: 1rem; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; }
-.toggle { display: flex; align-items: center; gap: 0.4rem; font-size: 0.875rem; color: #475569; cursor: pointer; }
-.list-demo-layout { display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: start; }
-.list-panel h3 { font-size: 0.875rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem; }
-.list-arrow { font-size: 1.5rem; color: #cbd5e1; padding-top: 2rem; }
+.site-footer a { color: #64748b; text-decoration: none; }
+.site-footer a:hover { color: #6366f1; }
 </style>
