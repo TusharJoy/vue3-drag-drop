@@ -7,6 +7,8 @@ Simple, lightweight drag and drop for Vue 3 using the native HTML Drag and Drop 
 
 **[Open in StackBlitz →](https://stackblitz.com/github/TusharJoy/vue3-drag-drop)**
 
+**[Live Demo →] (https://tusharjoy.github.io/vue3-drag-drop/)**
+
 ## Table of Contents
 
 - [Why](#why)
