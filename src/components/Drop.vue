@@ -13,10 +13,10 @@
 <script>
 import transferDataStore from "../helpers/transferDataStore";
 import { events } from "../helpers/constants";
-const insideElements = new Set();
+
 export default {
   data() {
-    return { transferData: undefined, isDraggingOver: false };
+    return { transferData: undefined, isDraggingOver: false, insideElements: new Set() };
   },
   props: {
     tag: { type: String, default: "div" },
@@ -39,20 +39,20 @@ export default {
        */
       // Add to the set on dragenter.
       if (name === events.dragenter) {
-        if (insideElements.size || nativeEvent.target === this.$el) {
-          insideElements.add(nativeEvent.target);
+        if (this.insideElements.size || nativeEvent.target === this.$el) {
+          this.insideElements.add(nativeEvent.target);
         }
       }
       // Remove from the set on dragleave.
       if (name === events.dragleave) {
-        insideElements.delete(nativeEvent.target);
+        this.insideElements.delete(nativeEvent.target);
       }
       // A drop resets everything.
       if (name === events.drop) {
-        insideElements.clear();
+        this.insideElements.clear();
       }
       // Finally, since Vue can't react to Set changes, set a flag indicating drag status.
-      this.isDraggingOver = Boolean(insideElements.size);
+      this.isDraggingOver = Boolean(this.insideElements.size);
     },
   },
 };

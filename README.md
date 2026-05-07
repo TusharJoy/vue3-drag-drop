@@ -1,271 +1,492 @@
-# #vue3-drag-drop
+# vue3-drag-drop
 
+Simple, lightweight drag and drop for Vue 3 using the native HTML Drag and Drop API.
 
+[![npm](https://img.shields.io/npm/v/vue3-drag-drop.svg)](https://www.npmjs.com/package/vue3-drag-drop)
+[![license](https://img.shields.io/npm/l/vue3-drag-drop.svg)](https://github.com/TusharJoy/vue3-drag-drop/blob/main/LICENSE)
 
-## Table of contents
+**[Open in StackBlitz →](https://stackblitz.com/github/TusharJoy/vue3-drag-drop)**
 
-- [Introduction](#introduction)
+## Table of Contents
+
+- [Why](#why)
 - [Installation](#installation)
+- [Quick Start](#quick-start)
 - [API](#api)
+  - [Drag Props](#drag-props)
+  - [Events](#events)
+  - [Slots](#slots)
 - [Examples](#examples)
+  - [Basic drag and drop](#basic-drag-and-drop)
+  - [Transfer complex data](#transfer-complex-data)
+  - [Conditional drop acceptance](#conditional-drop-acceptance)
+  - [Custom drag image via slot](#custom-drag-image-via-slot)
+  - [Scoped slot — show data on hover](#scoped-slot--show-data-on-hover)
+- [Touch Support](#touch-support)
+- [Development](#development)
+- [License](#license)
 
-# Introduction
+---
 
-The Drag and Drop API is pretty jank. Here are a handful of annoying issues:
+## Why
 
-- Data transferred from a draggable element to a dropzone is only available in the dropzone's `drop` event. Want to take a look at the draggable's data during the `dragover` event? Say, to determine whether or not we can allow the drop? Sorry! No helpful UI feedback for your users!
-- Got an object or an array you want to transfer between a draggable and a dropzone? Tough. Gotta serialize it. Say goodbye to your references.
-- Did you remember to do `event.preventDefault()` on `dragover` for every element you want to be used as a dropzone?
+The native HTML Drag and Drop API has a few painful quirks:
 
-And so on.
+- Transfer data is **not available** during `dragover` — you can't inspect what's being dragged to decide whether to accept it.
+- You must serialize complex data (objects, arrays) to strings yourself.
+- Every drop target needs `event.preventDefault()` on `dragover` or drops silently fail.
 
-The goal of this package is to provide a simple, lightweight wrapper around the API so you don't have to fiddle with all that nonsense. There are [plenty of existing Vue components](https://github.com/vuejs/awesome-vue#drag-and-drop) that provide rich handling of drag and drop, usually between or among lists and with tons of bells and whistles. They're great, but sometimes you don't need all that business, or it even gets in the way.
+This package wraps those rough edges so you can focus on your app.
 
-
-# Installation
-
-```
-npm install --save vue3-drag-drop
-```
-
-## Default import
-
-```javascript
-import Vue from "vue";
-import { Drag, Drop } from "vue3-drag-drop";
-
-Vue.component("drag", Drag);
-Vue.component("drop", Drop);
-```
-
-Or install both:
-
-```javascript
-import Vue from "vue";
-import VueDragDrop from "vue3-drag-drop";
-
-Vue.use(VueDragDrop);
-```
-
-## Browser
-
-```html
-<script src="vue.js"></script>
-<script src="vue3-drag-drop/dist/vue3-drag-drop.browser.js"></script>
-```
-
-The plugin should be auto-installed. If not, you can install it manually with the instructions below.
-
-```javascript
-Vue.component("drag", VueDragDrop.Drag);
-Vue.component("drop", VueDragDrop.Drop);
-```
-
-Or install both:
-
-```javascript
-Vue.use(VueDragDrop);
-```
-
-# API
-
-## Components
-
-### `Drag`
-
-A draggable element.
-
-### `Drop`
-
-An element onto which a `Drag` can be dropped. All `Drop` elements accept all `Drag` elements, unless you change the behavior in your application.
-
-## Properties
-
-The following properties apply to `Drag` components. `Drop` components don't receive any properties.
-
-### `draggable`
-
-**validation** `Boolean`  
-**default**: `true`  
-Whether or not the draggable is actually draggable. Useful if you need to disable it temporarily.
-
-### `transfer-data`
-
-**validation**: none  
-**default**: `null`  
-The data to be transmitted from the `Drag` to the `Drop` via events. This is passed through to every `Drop`-fired event.
-
-### `effect-allowed`
-
-**validation**: `null` or one of `['none', 'copy', 'copyLink', 'copyMove', 'link', 'linkMove', 'move', 'all', 'uninitialized']`  
-**default**: `null`  
-See https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/effectAllowed.
-
-### `drop-effect`
-
-**validation**: `null` or one of `['copy', 'move', 'link', 'none']`  
-**default**: `null`  
-See https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/dropEffect.
-
-### `image`
-
-**validation**: `null`, `String`  
-**default**: `null`  
-A URL for an image to be used for the drag image instead of the default. If you'd like to use HTML for the drag image instead, use the `image` slot. More details in the Slots section of this documentation.
-
-If both the `image` prop and `image` slot are present, the prop will be used and the slot will be ignored.
-
-### `image-x-offset`, `image-y-offset`
-
-**validation**: `Number`  
-**default**: `0`, `0`  
-By default, a custom drag image is positioned so that its top-left corner is anchored to the cursor. You can adjust that positioning with these values.
-
-### `hide-image-html`
-
-**validation**: `Boolean`  
-**default**: `true`  
-If the `Drag` `image` slot is used, toggle whether or not the HTML is rendered off-screen. See the `image` slot documentation for more details.
-
-### `tag`
-
-**validation** `String`
-**default**: `div`
-Drag or Drop element's wrapper, defaults to div.
-
-## Events
-
-All event are fired with the same arguments:
-
-- `transferData` _any_  
-  This is the data set on the `Drag`'s `transferData` prop. It _is_ available on all `Drop`-fired events, despite the official spec only permitting it on `drop`.
-
-- `nativeEvent` [_`DragEvent`_](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent)  
-  The native browser event. Useful particularly for retrieving the [`dataTransfer`](https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer) object, which is needed for handling [dropped files](https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/files).
-
-If you need to pass additional arguments in your event listener, the preferred method is to use the ES6 spread operator with `arguments`:
-
-```vue
-<drag @drag="myListener('foo', ...arguments)">Drag Me</drag>
-```
-
-```javascript
-myListener(myArg, transferData, nativeEvent) {
-  // myArg === 'foo'
-}
-```
-
-If you don't have the spread operator in your environment, you can use a wrapping function:
-
-```vue
-<drag
-  @drag="
-    function (transferData, nativeEvent) {
-      myListener('foo', transferData, nativeEvent);
-    }
-  "
->
-  Drag Me
-</drag>
-```
-
-### `dragstart`
-
-**components:** _`Drag`_  
-Fired once when dragging starts.
-
-### `drag`
-
-**components:** _`Drag`_  
-Repeatedly fired for the entire duration of the drag operation.
-
-### `dragenter`
-
-**components:** _`Drag`_, _`Drop`_  
-Fired once every time a `Drag` is dragged over a `Drop`.
-
-### `dragover`
-
-**components:** _`Drag`_, _`Drop`_  
-Repeatedly fired while a `Drag` is over a `Drop`.
-
-### `dragleave`
-
-**components:** _`Drag`_, _`Drop`_  
-Fired once every time a `Drag` leaves a `Drop`.
-
-### `drop`
-
-**components:** _`Drop`_  
-Fired once when a `Drag` is dropped on a `Drop`.
-
-### `dragend`
-
-**components:** _`Drag`_  
-Fired once when the drag operation is completed. Occurs after `drop`.
-
-## Slots
-
-### _default_
-
-**components:** _`Drag`_, _`Drop`_  
-**example**: `<drag>I am the default slot</drag>`  
-**example**: `<drop>So am I</drop>`  
-For `Drag`, the content that will be draggable. For `Drop`, the content over which a `Drag` can be dropped.
-
-Note that this is a [scoped slot](https://vuejs.org/v2/guide/components.html#Scoped-Slots). The scope contains a single key, `transferData`, which will contain exactly what you set in the `transferData` prop on the `Drag`. For `Drag` elements, this will be populated while a drag is in action, and for `Drop` elements, when a `Drag` is being dragged over. Checking for the `transferData` in the `Drop` scope is the simplest way to determine if a drag is in progress over it.
-
-### `image`
-
-**components:** _`Drag`_  
-**example**: `<drag>Drag Me<template slot="image"><div>I'm being dragged!</div></template></drag>`  
-The contents of this slot will be used as the drag image instead of the browser default. Since the spec likes to be annoying, this content has to be visible in order for it to show up as the drag image, so it's rendered off-screen for you using `position: fixed`. If you need this convenience turned off, or if you need to support a crummy browser that this doesn't work well with, you can set the `hideImageHtml` prop to `false`, which will prevent any additional styling being added. Just be aware that doing so will cause this content to appear inside the `Drag` element. It's up to you how to deal with it.
-
-Multiple `image` slots do nothing; only the first will be used. If both the `image` prop and `image` slot are present, the prop will be used and the slot will be ignored.
-
-
-# Plugin Development
+---
 
 ## Installation
 
-The first time you create or clone your plugin, you need to install the default dependencies:
-
+```bash
+npm install vue3-drag-drop
 ```
+
+---
+
+## Quick Start
+
+Register globally in `main.js`:
+
+```js
+import { createApp } from "vue";
+import App from "./App.vue";
+import { Drag, Drop } from "vue3-drag-drop";
+
+const app = createApp(App);
+app.component("Drag", Drag);
+app.component("Drop", Drop);
+app.mount("#app");
+```
+
+Or import locally in a component:
+
+```vue
+<script setup>
+import { Drag, Drop } from "vue3-drag-drop";
+</script>
+```
+
+---
+
+## API
+
+### Components
+
+#### `<Drag>`
+
+Wraps any content to make it draggable. Renders as a `<div>` by default (override with the `tag` prop).
+
+#### `<Drop>`
+
+A drop target. Accepts any `<Drag>`. Renders as a `<div>` by default.
+
+---
+
+### Drag Props
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `draggable` | `Boolean` | `true` | Toggle draggability on/off |
+| `transfer-data` | `any` | `null` | Data passed to all Drop events |
+| `effect-allowed` | `String` | `null` | One of `none copy copyLink copyMove link linkMove move all uninitialized` — see [MDN](https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/effectAllowed) |
+| `image` | `String` | `null` | URL for custom drag image |
+| `image-x-offset` | `Number` | `0` | X offset for custom drag image anchor |
+| `image-y-offset` | `Number` | `0` | Y offset for custom drag image anchor |
+| `hide-image-html` | `Boolean` | `true` | Hide off-screen image slot HTML |
+| `tag` | `String` | `"div"` | HTML tag for the wrapper element |
+
+### Drop Props
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `tag` | `String` | `"div"` | HTML tag for the wrapper element |
+
+---
+
+### Events
+
+All events receive the same two arguments:
+
+| Argument | Type | Description |
+|---|---|---|
+| `transferData` | `any` | The value set on the `<Drag>`'s `transfer-data` prop |
+| `nativeEvent` | `DragEvent` | The native browser event |
+
+#### `<Drag>` events
+
+| Event | Fired |
+|---|---|
+| `dragstart` | Once when drag begins |
+| `drag` | Continuously while dragging |
+| `dragenter` | When drag enters a Drop |
+| `dragleave` | When drag leaves a Drop |
+| `dragend` | Once when drag ends (after `drop`) |
+
+#### `<Drop>` events
+
+| Event | Fired |
+|---|---|
+| `dragenter` | When a Drag enters this target |
+| `dragover` | Continuously while a Drag is over this target |
+| `dragleave` | When a Drag leaves this target |
+| `drop` | When a Drag is dropped here |
+
+---
+
+### Slots
+
+#### Default slot — `<Drag>` and `<Drop>`
+
+Scoped. The scope exposes `transferData` — the current drag's transfer data. For `<Drag>`, populated while dragging. For `<Drop>`, populated while a drag is over it.
+
+```vue
+<Drop v-slot="{ transferData }">
+  <div :class="{ highlight: transferData }">
+    {{ transferData ? `Dropping: ${transferData.name}` : "Drop here" }}
+  </div>
+</Drop>
+```
+
+#### `image` slot — `<Drag>` only
+
+Use HTML as a custom drag image instead of the browser default:
+
+```vue
+<Drag :transfer-data="item">
+  {{ item.label }}
+  <template v-slot:image>
+    <div class="drag-ghost">{{ item.label }}</div>
+  </template>
+</Drag>
+```
+
+The slot content is rendered off-screen (`position: fixed; top: -1000px`) so it's visible to the browser but not to the user. Set `hide-image-html="false"` to disable this behavior.
+
+---
+
+## Examples
+
+### Basic drag and drop
+
+```vue
+<template>
+  <Drag :transfer-data="{ id: 1, label: 'Item A' }">
+    Drag me
+  </Drag>
+
+  <Drop @drop="onDrop">
+    Drop here
+  </Drop>
+</template>
+
+<script setup>
+import { Drag, Drop } from "vue3-drag-drop";
+
+function onDrop(transferData, nativeEvent) {
+  console.log("Dropped:", transferData); // { id: 1, label: 'Item A' }
+}
+</script>
+```
+
+---
+
+### Transfer complex data
+
+`transfer-data` accepts any JavaScript value — no serialization needed:
+
+```vue
+<template>
+  <Drag
+    v-for="card in cards"
+    :key="card.id"
+    :transfer-data="card"
+  >
+    {{ card.title }}
+  </Drag>
+
+  <Drop @drop="addCard">
+    <div v-for="card in column" :key="card.id">{{ card.title }}</div>
+  </Drop>
+</template>
+
+<script setup>
+import { ref } from "vue";
+import { Drag, Drop } from "vue3-drag-drop";
+
+const cards = ref([
+  { id: 1, title: "Task 1", priority: "high" },
+  { id: 2, title: "Task 2", priority: "low" },
+]);
+const column = ref([]);
+
+function addCard(card) {
+  column.value.push(card);
+}
+</script>
+```
+
+---
+
+### Conditional drop acceptance
+
+Use `transferData` in the Drop's scoped slot to show visual feedback — and inspect it in `dragover` to selectively accept drops:
+
+```vue
+<template>
+  <Drag :transfer-data="{ type: 'image', url: '...' }">Image file</Drag>
+  <Drag :transfer-data="{ type: 'video', url: '...' }">Video file</Drag>
+
+  <Drop
+    v-slot="{ transferData }"
+    @dragover="onDragOver"
+    @drop="onDrop"
+  >
+    <div :class="{ accepting: transferData?.type === 'image' }">
+      Images only
+    </div>
+  </Drop>
+</template>
+
+<script setup>
+import { Drag, Drop } from "vue3-drag-drop";
+
+function onDragOver(transferData, nativeEvent) {
+  if (transferData?.type !== "image") {
+    nativeEvent.dataTransfer.dropEffect = "none";
+  }
+}
+
+function onDrop(transferData, nativeEvent) {
+  if (transferData?.type === "image") {
+    console.log("Accepted image:", transferData.url);
+  }
+}
+</script>
+```
+
+---
+
+### Custom drag image via slot
+
+```vue
+<template>
+  <Drag :transfer-data="item">
+    {{ item.name }}
+    <template v-slot:image>
+      <div class="custom-ghost">
+        📦 {{ item.name }}
+      </div>
+    </template>
+  </Drag>
+</template>
+
+<script setup>
+import { Drag } from "vue3-drag-drop";
+const item = { name: "My Item" };
+</script>
+
+<style>
+.custom-ghost {
+  background: #4f46e5;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+}
+</style>
+```
+
+---
+
+### Scoped slot — show data on hover
+
+```vue
+<template>
+  <Drag :transfer-data="{ name: 'Report.pdf', size: '2.4MB' }">
+    Report.pdf
+  </Drag>
+
+  <Drop v-slot="{ transferData }">
+    <div class="dropzone" :class="{ active: transferData }">
+      <span v-if="transferData">
+        Drop to upload {{ transferData.name }} ({{ transferData.size }})
+      </span>
+      <span v-else>Drop files here</span>
+    </div>
+  </Drop>
+</template>
+
+<script setup>
+import { Drag, Drop } from "vue3-drag-drop";
+</script>
+```
+
+### Tracking drag lifecycle events
+
+Use `@dragstart` and `@dragend` on `<Drag>` to track when a drag begins and ends. Use `@dragenter` and `@dragleave` on `<Drop>` to react when the drag enters or leaves:
+
+```vue
+<template>
+  <Drag
+    :transfer-data="item"
+    @dragstart="onDragStart"
+    @dragend="onDragEnd"
+  >
+    {{ item.name }}
+  </Drag>
+
+  <Drop
+    @dragenter="onEnter"
+    @dragleave="onLeave"
+    @drop="onDrop"
+  >
+    <div :class="{ active: isOver }">Drop here</div>
+  </Drop>
+</template>
+
+<script setup>
+import { ref } from "vue";
+import { Drag, Drop } from "vue3-drag-drop";
+
+const item = { name: "my-file.txt", size: 1024 };
+const isDragging = ref(false);
+const isOver = ref(false);
+
+function onDragStart(transferData, nativeEvent) {
+  isDragging.value = true;
+  console.log("Drag started:", transferData.name);
+}
+
+function onDragEnd(transferData, nativeEvent) {
+  isDragging.value = false;
+  console.log("Drag ended");
+}
+
+function onEnter(transferData, nativeEvent) {
+  isOver.value = true;
+}
+
+function onLeave(transferData, nativeEvent) {
+  isOver.value = false;
+}
+
+function onDrop(transferData, nativeEvent) {
+  isOver.value = false;
+  console.log("Dropped:", transferData.name, transferData.size, "bytes");
+}
+</script>
+```
+
+### Moving and cloning between lists
+
+**Move** (item leaves source list):
+
+```vue
+<template>
+  <div class="list">
+    <Drag
+      v-for="item in listA"
+      :key="item.id"
+      :transfer-data="{ item, sourceList: 'A' }"
+    >
+      {{ item.label }}
+    </Drag>
+  </div>
+
+  <Drop @drop="moveItem">
+    <div v-for="item in listB" :key="item.id">{{ item.label }}</div>
+  </Drop>
+</template>
+
+<script setup>
+import { ref } from "vue";
+import { Drag, Drop } from "vue3-drag-drop";
+
+const listA = ref([
+  { id: 1, label: "Item 1" },
+  { id: 2, label: "Item 2" },
+]);
+const listB = ref([]);
+
+function moveItem({ item, sourceList }) {
+  if (sourceList === "A") {
+    listA.value = listA.value.filter((i) => i.id !== item.id);
+    listB.value.push(item);
+  }
+}
+</script>
+```
+
+**Clone** (item stays in source list):
+
+```vue
+<template>
+  <div class="list">
+    <Drag
+      v-for="item in listA"
+      :key="item.id"
+      :transfer-data="item"
+    >
+      {{ item.label }}
+    </Drag>
+  </div>
+
+  <Drop @drop="cloneItem">
+    <div v-for="item in listB" :key="item.id">{{ item.label }}</div>
+  </Drop>
+</template>
+
+<script setup>
+import { ref } from "vue";
+import { Drag, Drop } from "vue3-drag-drop";
+
+const listA = ref([
+  { id: 1, label: "Item 1" },
+  { id: 2, label: "Item 2" },
+]);
+const listB = ref([]);
+
+function cloneItem(item) {
+  if (!listB.value.find((i) => i.id === item.id)) {
+    listB.value.push({ ...item });
+  }
+}
+</script>
+```
+
+---
+
+## Touch Support
+
+Touch drag and drop is supported via a bundled polyfill based on [DragDropTouch](https://github.com/Bernardo-Castilho/DragDropTouch). No configuration needed — it activates automatically in browsers without native drag and drop touch support.
+
+---
+
+## Development
+
+```bash
+# Install deps
 npm install
-```
 
-## Watch and compile
-
-This will run webpack in watching mode and output the compiled files in the `dist` folder.
-
-```
+# Start dev server (http://localhost:5173)
 npm run dev
-```
 
-## Use it in another project
-
-While developing, you can follow the install instructions of your plugin and link it into the project that uses it.
-
-In the plugin folder:
-
-```
-npm link
-```
-
-In the other project folder:
-
-```
-npm link vue3-drag-drop
-```
-
-This will install it in the dependencies as a symlink, so that it gets any modifications made to the plugin.
-
-## Manual build
-
-This will build the plugin into the `dist` folder in production mode.
-
-```
+# Build library to dist/
 npm run build
+```
+
+To test changes in another project locally:
+
+```bash
+# In this repo
+npm link
+
+# In your other project
+npm link vue3-drag-drop
 ```
 
 ---

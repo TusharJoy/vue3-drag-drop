@@ -9,7 +9,7 @@
     @dragend="emitEvent(events.dragend, $event)"
   >
     <slot :transfer-data="scopedData"></slot>
-    <div v-if="hideImageHtml" :style="hideImageStyle">
+    <div v-if="hideImageHtml" ref="imageSlotWrapper" :style="hideImageStyle">
       <slot name="image" :transfer-data="scopedData"></slot>
     </div>
     <slot v-else name="image" :transfer-data="scopedData"></slot>
@@ -18,12 +18,11 @@
 
 <script>
 import transferDataStore from "../helpers/transferDataStore";
-import { dropEffects, effectsAllowed, events } from "../helpers/constants";
+import { effectsAllowed, events } from "../helpers/constants";
 export default {
   props: {
     draggable: { type: Boolean, default: true },
     transferData: {},
-    dropEffect: { validator: (value) => value in dropEffects },
     effectAllowed: { validator: (value) => value in effectsAllowed },
     image: String,
     imageXOffset: { type: Number, default: 0 },
@@ -45,47 +44,29 @@ export default {
   methods: {
     emitEvent(name, nativeEvent) {
       const transfer = nativeEvent.dataTransfer;
-      // Set drop effect on dragenter and dragover
-      if ([events.dragenter, events.dragover].includes(name)) {
-        if (this.dropEffect) {
-          transfer.dropEffect = this.dropEffect;
-        }
-      }
-      // A number of things need to happen on drag start
       if (name === events.dragstart) {
-        // Set the allowed effects
         if (this.effectAllowed) {
           transfer.effectAllowed = this.effectAllowed;
         }
-        // Set the drag image
-        if (this.image || this.$slots.image) {
-          let image;
-          if (this.image) {
-            image = new Image();
-            image.src = this.image;
-          } else if (this.$slots.image) {
-            image = this.$slots.image[0].elm;
-          }
+        if (this.image) {
+          const img = new Image();
+          img.src = this.image;
           if (transfer.setDragImage) {
-            transfer.setDragImage(image, this.imageXOffset, this.imageYOffset);
+            transfer.setDragImage(img, this.imageXOffset, this.imageYOffset);
+          }
+        } else if (this.$slots.image && this.$refs.imageSlotWrapper) {
+          const el = this.$refs.imageSlotWrapper.firstElementChild;
+          if (el && transfer.setDragImage) {
+            transfer.setDragImage(el, this.imageXOffset, this.imageYOffset);
           }
         }
-        // Set the transfer data
         if (this.transferData !== undefined) {
           transferDataStore.data = this.transferData;
-          // Set a dummy string for the real transfer data. Not actually used
-          // for anything, but necesssary for browser compatibility.
-          //
-          // TODO: Maybe this should be the actual data serialized. But since
-          // it's not actually used for anything it seems like a waste of CPU.
           nativeEvent.dataTransfer.setData("text", "");
         }
-        // Indicate that we're dragging.
         this.dragging = true;
       }
-      // At last, emit the event.
       this.$emit(name, this.transferData, nativeEvent);
-      // Clean up stored data on drag end after emitting.
       if (name === events.dragend) {
         transferDataStore.data = undefined;
         this.dragging = false;

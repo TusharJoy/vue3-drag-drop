@@ -1,9 +1,14 @@
-import "../helpers/DragDropTouch";
 import Drag from "./Drag.vue";
 import Drop from "./Drop.vue";
 
+if (typeof window !== "undefined") {
+  import("../helpers/DragDropTouch");
+}
+
 const SimpleDragDrop = {
   install(Vue) {
+    Vue.component("Drag", Drag);
+    Vue.component("Drop", Drop);
     Vue.component("drag", Drag);
     Vue.component("drop", Drop);
   },
