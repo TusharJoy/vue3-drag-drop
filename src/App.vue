@@ -1,5 +1,29 @@
 <script setup>
+import { ref } from "vue";
 import { Drag, Drop } from "./components/index";
+
+// ── Kanban ──
+const kanbanCols = ref([
+  { id: "todo",       label: "Todo",        color: "#6366f1", cards: [
+    { id: "k1", text: "Design mockups" },
+    { id: "k2", text: "Write tests" },
+    { id: "k3", text: "Review PRs" },
+  ]},
+  { id: "inprogress", label: "In Progress", color: "#f59e0b", cards: [
+    { id: "k4", text: "Implement auth" },
+  ]},
+  { id: "done",       label: "Done",        color: "#22c55e", cards: [
+    { id: "k5", text: "Setup CI" },
+  ]},
+]);
+
+function kanbanDrop(targetColId, card) {
+  for (const col of kanbanCols.value) {
+    col.cards = col.cards.filter((c) => c.id !== card.id);
+  }
+  const target = kanbanCols.value.find((c) => c.id === targetColId);
+  if (target) target.cards.push(card);
+}
 </script>
 
 <template>
@@ -29,7 +53,31 @@ import { Drag, Drop } from "./components/index";
           <p class="section-desc">Drag cards between columns. Demonstrates multi-drop-zone state management.</p>
         </div>
         <div class="section-body">
-          <!-- Task 2 content goes here -->
+          <div class="kanban-board">
+            <div v-for="col in kanbanCols" :key="col.id" class="kanban-col">
+              <div class="kanban-col-header" :style="{ borderTopColor: col.color }">
+                <span class="kanban-col-label">{{ col.label }}</span>
+                <span class="kanban-badge" :style="{ background: col.color }">{{ col.cards.length }}</span>
+              </div>
+              <Drop
+                v-slot="{ transferData }"
+                class="drop-zone kanban-drop"
+                :class="{ over: transferData }"
+                @drop="(card) => kanbanDrop(col.id, card)"
+              >
+                <Drag
+                  v-for="card in col.cards"
+                  :key="card.id"
+                  :transfer-data="card"
+                  class="drag-item kanban-card"
+                >
+                  <span class="kanban-handle">⠿</span>
+                  {{ card.text }}
+                </Drag>
+                <p v-if="col.cards.length === 0 && !transferData" class="empty-hint">Drop cards here</p>
+              </Drop>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -209,6 +257,15 @@ body {
   color: white; font-weight: 700; font-size: 0.875rem;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
+
+/* ── Kanban ── */
+.kanban-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.kanban-col-header { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.75rem; border-top: 3px solid; border-radius: 8px 8px 0 0; background: #f8fafc; margin-bottom: 0.5rem; }
+.kanban-col-label { font-size: 0.8rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; }
+.kanban-badge { color: white; font-size: 0.7rem; font-weight: 700; padding: 1px 7px; border-radius: 999px; }
+.kanban-drop { min-height: 200px; }
+.kanban-card { margin-bottom: 0.25rem; }
+.kanban-handle { color: #cbd5e1; font-size: 1rem; cursor: grab; }
 
 /* ── Footer ── */
 .site-footer {
