@@ -18,12 +18,11 @@
 
 <script>
 import transferDataStore from "../helpers/transferDataStore";
-import { dropEffects, effectsAllowed, events } from "../helpers/constants";
+import { effectsAllowed, events } from "../helpers/constants";
 export default {
   props: {
     draggable: { type: Boolean, default: true },
     transferData: {},
-    dropEffect: { validator: (value) => value in dropEffects },
     effectAllowed: { validator: (value) => value in effectsAllowed },
     image: String,
     imageXOffset: { type: Number, default: 0 },
