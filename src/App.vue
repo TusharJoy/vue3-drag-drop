@@ -54,6 +54,40 @@ function sortableDrop(targetItem) {
   sortableDragId.value = null;
   sortableOverId.value = null;
 }
+
+// ── File drop zone ──
+const droppedFiles = ref([]);
+const fileZoneOver = ref(false);
+
+function onFileDragOver(transferData, nativeEvent) {
+  const types = nativeEvent.dataTransfer.types;
+  if (!types.includes("Files")) {
+    nativeEvent.dataTransfer.dropEffect = "none";
+  }
+}
+
+function onFileDrop(transferData, nativeEvent) {
+  fileZoneOver.value = false;
+  const files = Array.from(nativeEvent.dataTransfer.files);
+  for (const file of files) {
+    const isImage = file.type.startsWith("image/");
+    droppedFiles.value.unshift({
+      id: Date.now() + Math.random(),
+      name: file.name,
+      size: (file.size / 1024).toFixed(1) + " KB",
+      type: file.type || "unknown",
+      accepted: isImage,
+    });
+  }
+}
+
+function fileIcon(type) {
+  if (type.startsWith("image/")) return "🖼";
+  if (type.startsWith("video/")) return "🎬";
+  if (type.startsWith("audio/")) return "🎵";
+  if (type.includes("pdf"))      return "📄";
+  return "📎";
+}
 </script>
 
 <template>
@@ -151,7 +185,34 @@ function sortableDrop(targetItem) {
           <p class="section-desc">Drop real files from your OS. Images accepted; other types rejected.</p>
         </div>
         <div class="section-body">
-          <!-- Task 4 content goes here -->
+          <Drop
+            class="drop-zone file-drop"
+            :class="{ over: fileZoneOver }"
+            @dragover="onFileDragOver"
+            @dragenter="() => fileZoneOver = true"
+            @dragleave="(_, e) => { if (!e.currentTarget.contains(e.relatedTarget)) fileZoneOver = false }"
+            @drop="onFileDrop"
+          >
+            <div class="file-drop-inner">
+              <span class="file-drop-icon">{{ fileZoneOver ? '📂' : '📁' }}</span>
+              <p class="file-drop-label">{{ fileZoneOver ? 'Release to drop' : 'Drop files here' }}</p>
+              <p class="file-drop-hint">Images accepted · Other types shown as rejected</p>
+            </div>
+          </Drop>
+
+          <div v-if="droppedFiles.length" class="file-list">
+            <div
+              v-for="file in droppedFiles"
+              :key="file.id"
+              class="file-entry"
+              :class="{ rejected: !file.accepted }"
+            >
+              <span class="file-icon">{{ fileIcon(file.type) }}</span>
+              <span class="file-name">{{ file.name }}</span>
+              <span class="file-size">{{ file.size }}</span>
+              <span class="file-status">{{ file.accepted ? '✓ accepted' : '✗ rejected' }}</span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -338,4 +399,20 @@ body {
 .sortable-item { width: 100%; justify-content: flex-start; }
 .sortable-item.dragging { opacity: 0.4; }
 .sortable-handle { margin-left: auto; color: #cbd5e1; font-size: 1rem; }
+
+/* ── File drop zone ── */
+.file-drop { min-height: 140px; justify-content: center; align-items: center; cursor: pointer; }
+.file-drop.over { border-color: #6366f1; background: #eef2ff; }
+.file-drop-inner { text-align: center; }
+.file-drop-icon { font-size: 2.5rem; display: block; margin-bottom: 0.5rem; }
+.file-drop-label { font-weight: 600; color: #475569; margin-bottom: 0.25rem; }
+.file-drop-hint { font-size: 0.8rem; color: #94a3b8; }
+.file-list { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 1rem; }
+.file-entry { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0.75rem; border-radius: 8px; background: #f0fdf4; border: 1px solid #bbf7d0; font-size: 0.875rem; }
+.file-entry.rejected { background: #fef2f2; border-color: #fecaca; }
+.file-icon { font-size: 1.1rem; }
+.file-name { font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-size { color: #64748b; font-size: 0.8rem; }
+.file-status { font-size: 0.75rem; font-weight: 700; color: #16a34a; }
+.file-entry.rejected .file-status { color: #dc2626; }
 </style>
