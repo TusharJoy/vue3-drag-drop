@@ -1,5 +1,4 @@
 <script setup>
-import { ref } from "vue";
 import { Drag, Drop } from "./components/index";
 </script>
 
@@ -14,8 +13,8 @@ import { Drag, Drop } from "./components/index";
         </div>
         <p class="header-tagline">Simple, lightweight drag and drop for Vue 3 using the native HTML Drag and Drop API.</p>
         <div class="header-links">
-          <a href="https://github.com/TusharJoy/vue3-drag-drop" target="_blank" class="btn btn-ghost">GitHub</a>
-          <a href="https://www.npmjs.com/package/vue3-drag-drop" target="_blank" class="btn btn-primary">npm install</a>
+          <a href="https://github.com/TusharJoy/vue3-drag-drop" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">GitHub</a>
+          <a href="https://www.npmjs.com/package/vue3-drag-drop" target="_blank" rel="noopener noreferrer" class="btn btn-primary">npm install</a>
         </div>
       </div>
     </header>
@@ -115,9 +114,9 @@ import { Drag, Drop } from "./components/index";
 
     <!-- Footer -->
     <footer class="site-footer">
-      <a href="https://github.com/TusharJoy/vue3-drag-drop" target="_blank">GitHub</a>
+      <a href="https://github.com/TusharJoy/vue3-drag-drop" target="_blank" rel="noopener noreferrer">GitHub</a>
       <span>·</span>
-      <a href="https://www.npmjs.com/package/vue3-drag-drop" target="_blank">npm</a>
+      <a href="https://www.npmjs.com/package/vue3-drag-drop" target="_blank" rel="noopener noreferrer">npm</a>
       <span>·</span>
       <span>MIT License</span>
     </footer>
