@@ -1,6 +1,9 @@
-import "../helpers/DragDropTouch";
 import Drag from "./Drag.vue";
 import Drop from "./Drop.vue";
+
+if (typeof window !== "undefined") {
+  import("../helpers/DragDropTouch");
+}
 
 const SimpleDragDrop = {
   install(Vue) {
