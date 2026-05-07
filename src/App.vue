@@ -50,7 +50,7 @@ function sortableDrop(targetItem) {
   const from = sortableItems.value.findIndex((i) => i.id === sortableDragId.value);
   const to   = sortableItems.value.findIndex((i) => i.id === targetItem.id);
   const moved = sortableItems.value.splice(from, 1)[0];
-  sortableItems.value.splice(to, 0, moved);
+  sortableItems.value.splice(from < to ? to - 1 : to, 0, moved);
   sortableDragId.value = null;
   sortableOverId.value = null;
 }
@@ -125,7 +125,7 @@ function sortableDrop(targetItem) {
               class="drop-zone sortable-drop"
               :class="{ over: sortableOverId === item.id && sortableDragId !== item.id }"
               @dragenter="() => sortableOverId = item.id"
-              @dragleave="() => { if (sortableOverId === item.id) sortableOverId = null }"
+              @dragleave="(_, e) => { if (!e.currentTarget.contains(e.relatedTarget) && sortableOverId === item.id) sortableOverId = null }"
               @drop="() => sortableDrop(item)"
             >
               <Drag
