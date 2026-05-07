@@ -24,6 +24,36 @@ function kanbanDrop(targetColId, card) {
   const target = kanbanCols.value.find((c) => c.id === targetColId);
   if (target) target.cards.push(card);
 }
+
+// ── Sortable list ──
+const sortableItems = ref([
+  { id: "s1", label: "First item",  color: "#6366f1" },
+  { id: "s2", label: "Second item", color: "#f59e0b" },
+  { id: "s3", label: "Third item",  color: "#22c55e" },
+  { id: "s4", label: "Fourth item", color: "#ef4444" },
+  { id: "s5", label: "Fifth item",  color: "#8b5cf6" },
+]);
+const sortableDragId = ref(null);
+const sortableOverId = ref(null);
+
+function sortableDragStart(item) {
+  sortableDragId.value = item.id;
+}
+
+function sortableDragEnd() {
+  sortableDragId.value = null;
+  sortableOverId.value = null;
+}
+
+function sortableDrop(targetItem) {
+  if (!sortableDragId.value || sortableDragId.value === targetItem.id) return;
+  const from = sortableItems.value.findIndex((i) => i.id === sortableDragId.value);
+  const to   = sortableItems.value.findIndex((i) => i.id === targetItem.id);
+  const moved = sortableItems.value.splice(from, 1)[0];
+  sortableItems.value.splice(to, 0, moved);
+  sortableDragId.value = null;
+  sortableOverId.value = null;
+}
 </script>
 
 <template>
@@ -88,7 +118,29 @@ function kanbanDrop(targetColId, card) {
           <p class="section-desc">Drag to reorder items within a single list.</p>
         </div>
         <div class="section-body">
-          <!-- Task 3 content goes here -->
+          <div class="sortable-list">
+            <Drop
+              v-for="item in sortableItems"
+              :key="item.id"
+              class="drop-zone sortable-drop"
+              :class="{ over: sortableOverId === item.id && sortableDragId !== item.id }"
+              @dragenter="() => sortableOverId = item.id"
+              @dragleave="() => { if (sortableOverId === item.id) sortableOverId = null }"
+              @drop="() => sortableDrop(item)"
+            >
+              <Drag
+                :transfer-data="item"
+                class="drag-item sortable-item"
+                :class="{ dragging: sortableDragId === item.id }"
+                @dragstart="() => sortableDragStart(item)"
+                @dragend="sortableDragEnd"
+              >
+                <span class="dot" :style="{ background: item.color }"></span>
+                {{ item.label }}
+                <span class="sortable-handle">↕</span>
+              </Drag>
+            </Drop>
+          </div>
         </div>
       </section>
 
@@ -277,4 +329,13 @@ body {
 }
 .site-footer a { color: #64748b; text-decoration: none; }
 .site-footer a:hover { color: #6366f1; }
+
+/* ── Sortable list ── */
+.sortable-list { display: flex; flex-direction: column; gap: 0; max-width: 400px; }
+.sortable-drop { min-height: unset; padding: 0.25rem 0; border: none; background: transparent; border-radius: 0; }
+.sortable-drop.over { border: none; background: transparent; }
+.sortable-drop.over .sortable-item { transform: translateY(2px); }
+.sortable-item { width: 100%; justify-content: flex-start; }
+.sortable-item.dragging { opacity: 0.4; }
+.sortable-handle { margin-left: auto; color: #cbd5e1; font-size: 1rem; }
 </style>
