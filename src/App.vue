@@ -181,8 +181,8 @@ function resetLists() {
 // ── Toggle draggable ──
 const toggleItems = ref([
   { id: "t1", label: "Always draggable", color: "#6366f1", enabled: true,  locked: false },
-  { id: "t2", label: "Toggle me below",  color: "#f59e0b", enabled: true,  locked: false },
-  { id: "t3", label: "Toggle me below",  color: "#22c55e", enabled: false, locked: false },
+  { id: "t2", label: "Toggle me (on)",    color: "#f59e0b", enabled: true,  locked: false },
+  { id: "t3", label: "Toggle me (off)",   color: "#22c55e", enabled: false, locked: false },
   { id: "t4", label: "Always locked",    color: "#94a3b8", enabled: false, locked: true  },
 ]);
 const toggleDropped = ref(null);
@@ -386,6 +386,8 @@ const toggleDropped = ref(null);
                     class="drag-item toggle-drag"
                     :class="{ disabled: !item.enabled }"
                     :style="{ borderColor: item.enabled ? item.color : '#e2e8f0' }"
+                    @dragstart="(d) => logEvent('dragstart', d)"
+                    @dragend="(d) => logEvent('dragend', d)"
                   >
                     <span class="dot" :style="{ background: item.enabled ? item.color : '#cbd5e1' }"></span>
                     {{ item.label }}
@@ -433,6 +435,8 @@ const toggleDropped = ref(null);
                   :transfer-data="item"
                   class="drag-item"
                   :style="{ borderColor: item.color }"
+                  @dragstart="(d) => logEvent('dragstart', d)"
+                  @dragend="(d) => logEvent('dragend', d)"
                 >
                   <span class="dot" :style="{ background: item.color }"></span>
                   {{ item.label }}
