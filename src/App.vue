@@ -95,6 +95,15 @@ const ghostDemoDropped = ref(null);
 function onGhostDrop(data) {
   ghostDemoDropped.value = `Dropped: "${data.label}" (${data.ghostType} ghost)`;
 }
+
+// ── Toggle draggable ──
+const toggleItems = ref([
+  { id: "t1", label: "Always draggable", color: "#6366f1", enabled: true,  locked: false },
+  { id: "t2", label: "Toggle me below",  color: "#f59e0b", enabled: true,  locked: false },
+  { id: "t3", label: "Toggle me below",  color: "#22c55e", enabled: false, locked: false },
+  { id: "t4", label: "Always locked",    color: "#94a3b8", enabled: false, locked: true  },
+]);
+const toggleDropped = ref(null);
 </script>
 
 <template>
@@ -277,7 +286,36 @@ function onGhostDrop(data) {
           <p class="section-desc">Enable or disable individual items using the <code>:draggable</code> prop.</p>
         </div>
         <div class="section-body">
-          <!-- Task 6 content goes here -->
+          <div class="toggle-layout">
+            <div class="toggle-source">
+              <div class="toggle-items">
+                <div v-for="item in toggleItems" :key="item.id" class="toggle-row">
+                  <Drag
+                    :transfer-data="item"
+                    :draggable="item.enabled"
+                    class="drag-item toggle-drag"
+                    :class="{ disabled: !item.enabled }"
+                    :style="{ borderColor: item.enabled ? item.color : '#e2e8f0' }"
+                  >
+                    <span class="dot" :style="{ background: item.enabled ? item.color : '#cbd5e1' }"></span>
+                    {{ item.label }}
+                    <span v-if="!item.enabled && item.locked" class="lock-icon">🔒</span>
+                  </Drag>
+                  <label v-if="!item.locked" class="toggle-switch">
+                    <input type="checkbox" v-model="item.enabled" />
+                    <span>{{ item.enabled ? 'Enabled' : 'Disabled' }}</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <Drop
+              class="drop-zone toggle-drop"
+              @drop="(d) => toggleDropped = `Dropped: ${d.label}`"
+            >
+              <p class="empty-hint">{{ toggleDropped ?? 'Drop enabled items here' }}</p>
+            </Drop>
+          </div>
         </div>
       </section>
 
@@ -470,4 +508,13 @@ body {
 .ghost-item { font-size: 0.9rem; }
 .ghost-drop { min-height: 80px; justify-content: center; }
 .custom-ghost-preview { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+
+/* ── Toggle draggable ── */
+.toggle-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.toggle-items { display: flex; flex-direction: column; gap: 0.6rem; }
+.toggle-row { display: flex; align-items: center; gap: 0.75rem; }
+.toggle-drag { flex: 1; }
+.toggle-switch { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: #64748b; cursor: pointer; white-space: nowrap; }
+.lock-icon { margin-left: auto; font-size: 0.9rem; }
+.toggle-drop { min-height: 180px; justify-content: center; }
 </style>
