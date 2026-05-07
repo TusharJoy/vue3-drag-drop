@@ -61,7 +61,7 @@ const fileZoneOver = ref(false);
 
 function onFileDragOver(transferData, nativeEvent) {
   const types = nativeEvent.dataTransfer.types;
-  if (!types.includes("Files")) {
+  if (!Array.from(types).includes("Files")) {
     nativeEvent.dataTransfer.dropEffect = "none";
   }
 }
@@ -72,7 +72,7 @@ function onFileDrop(transferData, nativeEvent) {
   for (const file of files) {
     const isImage = file.type.startsWith("image/");
     droppedFiles.value.unshift({
-      id: Date.now() + Math.random(),
+      id: Date.now().toString() + Math.random().toString(36).slice(2),
       name: file.name,
       size: (file.size / 1024).toFixed(1) + " KB",
       type: file.type || "unknown",
