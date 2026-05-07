@@ -7,8 +7,8 @@ if (typeof window !== "undefined") {
 
 const SimpleDragDrop = {
   install(Vue) {
-    Vue.component("drag", Drag);
-    Vue.component("drop", Drop);
+    Vue.component("Drag", Drag);
+    Vue.component("Drop", Drop);
   },
 };
 

@@ -124,7 +124,6 @@ All events receive the same two arguments:
 | `dragstart` | Once when drag begins |
 | `drag` | Continuously while dragging |
 | `dragenter` | When drag enters a Drop |
-| `dragover` | Continuously while over a Drop |
 | `dragleave` | When drag leaves a Drop |
 | `dragend` | Once when drag ends (after `drop`) |
 
