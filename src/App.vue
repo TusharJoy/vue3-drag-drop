@@ -47,6 +47,23 @@ function logEvent(name, data) {
   eventLog.value.unshift({ name, label: data?.label ?? "—", ts: Date.now() });
   if (eventLog.value.length > MAX_LOG) eventLog.value.pop();
 }
+
+const cloneMode = ref(false);
+const sourceList = ref([
+  { id: 101, label: "Widget A" },
+  { id: 102, label: "Widget B" },
+  { id: 103, label: "Widget C" },
+]);
+const targetList = ref([]);
+
+function handleListDrop(item) {
+  if (!targetList.value.find((i) => i.id === item.id)) {
+    targetList.value.push({ ...item });
+  }
+  if (!cloneMode.value) {
+    sourceList.value = sourceList.value.filter((i) => i.id !== item.id);
+  }
+}
 </script>
 
 <template>
@@ -156,6 +173,52 @@ function logEvent(name, data) {
       </div>
     </section>
 
+    <!-- Move vs Clone demo -->
+    <section class="list-demo-section">
+      <div class="list-demo-header">
+        <h2>Move vs Clone</h2>
+        <label class="toggle">
+          <input type="checkbox" v-model="cloneMode" />
+          Clone mode (keep in source)
+        </label>
+      </div>
+      <div class="list-demo-layout">
+        <div class="list-panel">
+          <h3>Source</h3>
+          <div class="item-list">
+            <Drag
+              v-for="item in sourceList"
+              :key="item.id"
+              :transfer-data="item"
+              class="drag-item"
+            >
+              {{ item.label }}
+            </Drag>
+            <p v-if="sourceList.length === 0" class="empty-hint">All moved</p>
+          </div>
+        </div>
+        <div class="list-arrow">→</div>
+        <div class="list-panel">
+          <h3>Target</h3>
+          <Drop
+            v-slot="{ transferData }"
+            class="drop-zone"
+            :class="{ 'over-valid': transferData }"
+            @drop="handleListDrop"
+          >
+            <p v-if="targetList.length === 0 && !transferData" class="empty-hint">Drop here</p>
+            <div
+              v-for="item in targetList"
+              :key="item.id"
+              class="basket-item"
+            >
+              {{ item.label }}
+            </div>
+          </Drop>
+        </div>
+      </div>
+    </section>
+
     <!-- Status log -->
     <p v-if="lastDropped" class="status">{{ lastDropped }}</p>
   </div>
@@ -230,4 +293,12 @@ h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; }
 .log-entry { display: flex; gap: 1rem; padding: 0.25rem 0.5rem; border-radius: 4px; background: #f8fafc; }
 .log-name { color: #6366f1; font-weight: 700; min-width: 100px; }
 .log-label { color: #475569; }
+
+.list-demo-section { margin-top: 2rem; }
+.list-demo-header { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 0.75rem; }
+.list-demo-header h2 { font-size: 1rem; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; }
+.toggle { display: flex; align-items: center; gap: 0.4rem; font-size: 0.875rem; color: #475569; cursor: pointer; }
+.list-demo-layout { display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: start; }
+.list-panel h3 { font-size: 0.875rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem; }
+.list-arrow { font-size: 1.5rem; color: #cbd5e1; padding-top: 2rem; }
 </style>

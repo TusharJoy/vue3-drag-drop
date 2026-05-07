@@ -381,6 +381,83 @@ function onDrop(transferData, nativeEvent) {
 </script>
 ```
 
+### Moving and cloning between lists
+
+**Move** (item leaves source list):
+
+```vue
+<template>
+  <div class="list">
+    <Drag
+      v-for="item in listA"
+      :key="item.id"
+      :transfer-data="{ item, sourceList: 'A' }"
+    >
+      {{ item.label }}
+    </Drag>
+  </div>
+
+  <Drop @drop="moveItem">
+    <div v-for="item in listB" :key="item.id">{{ item.label }}</div>
+  </Drop>
+</template>
+
+<script setup>
+import { ref } from "vue";
+import { Drag, Drop } from "vue3-drag-drop";
+
+const listA = ref([
+  { id: 1, label: "Item 1" },
+  { id: 2, label: "Item 2" },
+]);
+const listB = ref([]);
+
+function moveItem({ item, sourceList }) {
+  if (sourceList === "A") {
+    listA.value = listA.value.filter((i) => i.id !== item.id);
+    listB.value.push(item);
+  }
+}
+</script>
+```
+
+**Clone** (item stays in source list):
+
+```vue
+<template>
+  <div class="list">
+    <Drag
+      v-for="item in listA"
+      :key="item.id"
+      :transfer-data="item"
+    >
+      {{ item.label }}
+    </Drag>
+  </div>
+
+  <Drop @drop="cloneItem">
+    <div v-for="item in listB" :key="item.id">{{ item.label }}</div>
+  </Drop>
+</template>
+
+<script setup>
+import { ref } from "vue";
+import { Drag, Drop } from "vue3-drag-drop";
+
+const listA = ref([
+  { id: 1, label: "Item 1" },
+  { id: 2, label: "Item 2" },
+]);
+const listB = ref([]);
+
+function cloneItem(item) {
+  if (!listB.value.find((i) => i.id === item.id)) {
+    listB.value.push({ ...item });
+  }
+}
+</script>
+```
+
 ---
 
 ## Touch Support
