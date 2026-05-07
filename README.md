@@ -325,6 +325,62 @@ import { Drag, Drop } from "vue3-drag-drop";
 </script>
 ```
 
+### Tracking drag lifecycle events
+
+Use `@dragstart` and `@dragend` on `<Drag>` to track when a drag begins and ends. Use `@dragenter` and `@dragleave` on `<Drop>` to react when the drag enters or leaves:
+
+```vue
+<template>
+  <Drag
+    :transfer-data="item"
+    @dragstart="onDragStart"
+    @dragend="onDragEnd"
+  >
+    {{ item.name }}
+  </Drag>
+
+  <Drop
+    @dragenter="onEnter"
+    @dragleave="onLeave"
+    @drop="onDrop"
+  >
+    <div :class="{ active: isOver }">Drop here</div>
+  </Drop>
+</template>
+
+<script setup>
+import { ref } from "vue";
+import { Drag, Drop } from "vue3-drag-drop";
+
+const item = { name: "my-file.txt", size: 1024 };
+const isDragging = ref(false);
+const isOver = ref(false);
+
+function onDragStart(transferData, nativeEvent) {
+  isDragging.value = true;
+  console.log("Drag started:", transferData.name);
+}
+
+function onDragEnd(transferData, nativeEvent) {
+  isDragging.value = false;
+  console.log("Drag ended");
+}
+
+function onEnter(transferData, nativeEvent) {
+  isOver.value = true;
+}
+
+function onLeave(transferData, nativeEvent) {
+  isOver.value = false;
+}
+
+function onDrop(transferData, nativeEvent) {
+  isOver.value = false;
+  console.log("Dropped:", transferData.name, transferData.size, "bytes");
+}
+</script>
+```
+
 ---
 
 ## Touch Support

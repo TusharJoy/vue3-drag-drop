@@ -39,6 +39,14 @@ function guardFruits(data, nativeEvent) {
 function guardVeggies(data, nativeEvent) {
   if (data?.type !== "vegetable") nativeEvent.dataTransfer.dropEffect = "none";
 }
+
+const eventLog = ref([]);
+const MAX_LOG = 8;
+
+function logEvent(name, data) {
+  eventLog.value.unshift({ name, label: data?.label ?? "—", ts: Date.now() });
+  if (eventLog.value.length > MAX_LOG) eventLog.value.pop();
+}
 </script>
 
 <template>
@@ -57,6 +65,8 @@ function guardVeggies(data, nativeEvent) {
             :transfer-data="item"
             class="drag-item"
             :style="{ borderColor: item.color }"
+            @dragstart="(d) => logEvent('dragstart', d)"
+            @dragend="(d) => logEvent('dragend', d)"
           >
             <span class="dot" :style="{ background: item.color }"></span>
             {{ item.label }}
@@ -81,6 +91,8 @@ function guardVeggies(data, nativeEvent) {
             'over-invalid': transferData && transferData.type !== 'fruit',
           }"
           @dragover="guardFruits"
+          @dragenter="(d) => logEvent('dragenter', d)"
+          @dragleave="(d) => logEvent('dragleave', d)"
           @drop="dropOnFruits"
         >
           <!-- Always visible: shows drag-over feedback even after items are present -->
@@ -111,6 +123,8 @@ function guardVeggies(data, nativeEvent) {
             'over-invalid': transferData && transferData.type !== 'vegetable',
           }"
           @dragover="guardVeggies"
+          @dragenter="(d) => logEvent('dragenter', d)"
+          @dragleave="(d) => logEvent('dragleave', d)"
           @drop="dropOnVeggies"
         >
           <p v-if="transferData" class="drag-hint">
@@ -129,6 +143,18 @@ function guardVeggies(data, nativeEvent) {
         </Drop>
       </section>
     </div>
+
+    <!-- Event log -->
+    <section class="event-log-section">
+      <h2>Event Log</h2>
+      <div class="event-log">
+        <div v-if="eventLog.length === 0" class="log-empty">Drag something to see events fire</div>
+        <div v-for="entry in eventLog" :key="entry.ts" class="log-entry">
+          <span class="log-name">{{ entry.name }}</span>
+          <span class="log-label">{{ entry.label }}</span>
+        </div>
+      </div>
+    </section>
 
     <!-- Status log -->
     <p v-if="lastDropped" class="status">{{ lastDropped }}</p>
@@ -196,4 +222,12 @@ h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; }
   background: #f1f5f9; color: #475569; font-size: 0.9rem;
   border-left: 3px solid #6366f1;
 }
+
+.event-log-section { margin-top: 2rem; }
+.event-log-section h2 { font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; }
+.event-log { display: flex; flex-direction: column; gap: 0.25rem; font-family: monospace; font-size: 0.8rem; }
+.log-empty { color: #94a3b8; }
+.log-entry { display: flex; gap: 1rem; padding: 0.25rem 0.5rem; border-radius: 4px; background: #f8fafc; }
+.log-name { color: #6366f1; font-weight: 700; min-width: 100px; }
+.log-label { color: #475569; }
 </style>
