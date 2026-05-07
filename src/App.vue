@@ -96,6 +96,35 @@ function onGhostDrop(data) {
   ghostDemoDropped.value = `Dropped: "${data.label}" (${data.ghostType} ghost)`;
 }
 
+// ── Move vs Clone ──
+const cloneMode = ref(false);
+const sourceList = ref([
+  { id: 201, label: "Widget A", color: "#6366f1" },
+  { id: 202, label: "Widget B", color: "#f59e0b" },
+  { id: 203, label: "Widget C", color: "#22c55e" },
+  { id: 204, label: "Widget D", color: "#ef4444" },
+]);
+const targetList = ref([]);
+
+function handleListDrop(item) {
+  if (!targetList.value.find((i) => i.id === item.id)) {
+    targetList.value.push({ ...item });
+  }
+  if (!cloneMode.value) {
+    sourceList.value = sourceList.value.filter((i) => i.id !== item.id);
+  }
+}
+
+function resetLists() {
+  sourceList.value = [
+    { id: 201, label: "Widget A", color: "#6366f1" },
+    { id: 202, label: "Widget B", color: "#f59e0b" },
+    { id: 203, label: "Widget C", color: "#22c55e" },
+    { id: 204, label: "Widget D", color: "#ef4444" },
+  ];
+  targetList.value = [];
+}
+
 // ── Toggle draggable ──
 const toggleItems = ref([
   { id: "t1", label: "Always draggable", color: "#6366f1", enabled: true,  locked: false },
@@ -326,7 +355,52 @@ const toggleDropped = ref(null);
           <p class="section-desc">Toggle between moving items (removed from source) and cloning them (kept in source).</p>
         </div>
         <div class="section-body">
-          <!-- Task 7 content goes here -->
+          <div class="moveclone-controls">
+            <label class="toggle-switch">
+              <input type="checkbox" v-model="cloneMode" />
+              <span>{{ cloneMode ? 'Clone mode — items stay in source' : 'Move mode — items leave source' }}</span>
+            </label>
+            <button class="btn btn-ghost btn-sm" @click="resetLists">Reset</button>
+          </div>
+          <div class="moveclone-layout">
+            <div>
+              <p class="col-label">Source</p>
+              <div class="item-col">
+                <Drag
+                  v-for="item in sourceList"
+                  :key="item.id"
+                  :transfer-data="item"
+                  class="drag-item"
+                  :style="{ borderColor: item.color }"
+                >
+                  <span class="dot" :style="{ background: item.color }"></span>
+                  {{ item.label }}
+                </Drag>
+                <p v-if="sourceList.length === 0" class="empty-hint">All moved</p>
+              </div>
+            </div>
+            <div class="moveclone-arrow">{{ cloneMode ? '⊕' : '→' }}</div>
+            <div>
+              <p class="col-label">Target</p>
+              <Drop
+                v-slot="{ transferData }"
+                class="drop-zone"
+                :class="{ over: transferData }"
+                @drop="handleListDrop"
+              >
+                <div
+                  v-for="item in targetList"
+                  :key="item.id"
+                  class="drag-item"
+                  :style="{ borderColor: item.color }"
+                >
+                  <span class="dot" :style="{ background: item.color }"></span>
+                  {{ item.label }}
+                </div>
+                <p v-if="targetList.length === 0 && !transferData" class="empty-hint">Drop here</p>
+              </Drop>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -517,4 +591,12 @@ body {
 .toggle-switch { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: #64748b; cursor: pointer; white-space: nowrap; }
 .lock-icon { margin-left: auto; font-size: 0.9rem; }
 .toggle-drop { min-height: 180px; justify-content: center; }
+
+/* ── Move vs Clone ── */
+.moveclone-controls { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+.moveclone-layout { display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: start; }
+.moveclone-arrow { font-size: 1.5rem; color: #cbd5e1; padding-top: 1.5rem; text-align: center; }
+.col-label { font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+.item-col { display: flex; flex-direction: column; gap: 0.4rem; }
+.btn-sm { padding: 0.3rem 0.75rem; font-size: 0.8rem; }
 </style>
