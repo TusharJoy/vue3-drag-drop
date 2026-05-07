@@ -96,6 +96,21 @@ function onGhostDrop(data) {
   ghostDemoDropped.value = `Dropped: "${data.label}" (${data.ghostType} ghost)`;
 }
 
+// ── Global event log ──
+const eventLog = ref([]);
+const MAX_LOG = 10;
+
+function logEvent(name, data) {
+  const label = data?.label ?? data?.text ?? "file";
+  eventLog.value.unshift({
+    id: Date.now().toString() + Math.random().toString(36).slice(2),
+    name,
+    label,
+    ts: new Date().toLocaleTimeString("en", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" }),
+  });
+  if (eventLog.value.length > MAX_LOG) eventLog.value.pop();
+}
+
 // ── Move vs Clone ──
 const cloneMode = ref(false);
 const sourceList = ref([
@@ -173,12 +188,16 @@ const toggleDropped = ref(null);
                 class="drop-zone kanban-drop"
                 :class="{ over: transferData }"
                 @drop="(droppedCard) => kanbanDrop(col.id, droppedCard)"
+                @dragenter="(d) => logEvent('dragenter', d)"
+                @dragleave="(d) => logEvent('dragleave', d)"
               >
                 <Drag
                   v-for="card in col.cards"
                   :key="card.id"
                   :transfer-data="card"
                   class="drag-item kanban-card"
+                  @dragstart="(d) => logEvent('dragstart', d)"
+                  @dragend="(d) => logEvent('dragend', d)"
                 >
                   <span class="kanban-handle">⠿</span>
                   {{ card.text }}
@@ -211,8 +230,8 @@ const toggleDropped = ref(null);
                 :transfer-data="item"
                 class="drag-item sortable-item"
                 :class="{ dragging: sortableDragId === item.id }"
-                @dragstart="() => sortableDragStart(item)"
-                @dragend="sortableDragEnd"
+                @dragstart="(d) => { sortableDragStart(d); logEvent('dragstart', d); }"
+                @dragend="(d) => { sortableDragEnd(); logEvent('dragend', d); }"
               >
                 <span class="dot" :style="{ background: item.color }"></span>
                 {{ item.label }}
@@ -274,6 +293,8 @@ const toggleDropped = ref(null);
               <Drag
                 :transfer-data="{ label: 'Default ghost', ghostType: 'default' }"
                 class="drag-item ghost-item"
+                @dragstart="(d) => logEvent('dragstart', d)"
+                @dragend="(d) => logEvent('dragend', d)"
               >
                 🖱 Drag me (default)
               </Drag>
@@ -287,6 +308,8 @@ const toggleDropped = ref(null);
               <Drag
                 :transfer-data="{ label: 'Custom ghost', ghostType: 'custom' }"
                 class="drag-item ghost-item"
+                @dragstart="(d) => logEvent('dragstart', d)"
+                @dragend="(d) => logEvent('dragend', d)"
               >
                 ✨ Drag me (custom)
                 <template v-slot:image>
@@ -411,7 +434,16 @@ const toggleDropped = ref(null);
           <p class="section-desc">All 7 drag events fire in real-time. Drag anything on this page to see them.</p>
         </div>
         <div class="section-body">
-          <!-- Task 8 content goes here -->
+          <div class="event-log">
+            <div v-if="eventLog.length === 0" class="log-empty">Drag anything on this page to see events fire here.</div>
+            <transition-group name="log" tag="div" class="log-list">
+              <div v-for="entry in eventLog" :key="entry.id" class="log-entry">
+                <span class="log-ts">{{ entry.ts }}</span>
+                <span class="log-name" :class="`log-${entry.name}`">{{ entry.name }}</span>
+                <span class="log-label">{{ entry.label }}</span>
+              </div>
+            </transition-group>
+          </div>
         </div>
       </section>
 
@@ -599,4 +631,21 @@ body {
 .col-label { font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
 .item-col { display: flex; flex-direction: column; gap: 0.4rem; }
 .btn-sm { padding: 0.3rem 0.75rem; font-size: 0.8rem; }
+
+/* ── Event log ── */
+.event-log { font-family: monospace; font-size: 0.8rem; }
+.log-empty { color: #94a3b8; }
+.log-list { display: flex; flex-direction: column; gap: 0.2rem; }
+.log-entry { display: flex; gap: 0.75rem; padding: 0.3rem 0.6rem; border-radius: 6px; background: #f8fafc; border: 1px solid #f1f5f9; }
+.log-ts { color: #94a3b8; min-width: 80px; }
+.log-name { font-weight: 700; min-width: 100px; }
+.log-dragstart  { color: #6366f1; }
+.log-dragend    { color: #8b5cf6; }
+.log-dragenter  { color: #22c55e; }
+.log-dragleave  { color: #f59e0b; }
+.log-dragover   { color: #64748b; }
+.log-drop       { color: #ef4444; }
+.log-label { color: #475569; }
+.log-enter-active { transition: opacity 0.2s, transform 0.2s; }
+.log-enter-from { opacity: 0; transform: translateY(-4px); }
 </style>
