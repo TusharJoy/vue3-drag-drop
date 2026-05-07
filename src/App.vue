@@ -96,6 +96,44 @@ function onGhostDrop(data) {
   ghostDemoDropped.value = `Dropped: "${data.label}" (${data.ghostType} ghost)`;
 }
 
+// ── Typed drop zones ──
+const typedItems = ref([
+  { id: "ty1", label: "Apple",      type: "fruit",     color: "#ef4444" },
+  { id: "ty2", label: "Banana",     type: "fruit",     color: "#eab308" },
+  { id: "ty3", label: "Carrot",     type: "vegetable", color: "#f97316" },
+  { id: "ty4", label: "Broccoli",   type: "vegetable", color: "#22c55e" },
+  { id: "ty5", label: "Report.pdf", type: "file",      color: "#6366f1" },
+]);
+const fruitBasket = ref([]);
+const vegBasket   = ref([]);
+const typedStatus = ref(null);
+
+function dropOnFruits(data) {
+  if (data.type === "fruit" && !fruitBasket.value.find((i) => i.id === data.id)) {
+    fruitBasket.value.push(data);
+    typedStatus.value = `✓ Added ${data.label} to Fruits`;
+  } else if (data.type !== "fruit") {
+    typedStatus.value = `✗ Rejected: ${data.label} is not a fruit`;
+  }
+}
+
+function dropOnVeggies(data) {
+  if (data.type === "vegetable" && !vegBasket.value.find((i) => i.id === data.id)) {
+    vegBasket.value.push(data);
+    typedStatus.value = `✓ Added ${data.label} to Veggies`;
+  } else if (data.type !== "vegetable") {
+    typedStatus.value = `✗ Rejected: ${data.label} is not a vegetable`;
+  }
+}
+
+function guardFruits(data, nativeEvent) {
+  if (data?.type !== "fruit") nativeEvent.dataTransfer.dropEffect = "none";
+}
+
+function guardVeggies(data, nativeEvent) {
+  if (data?.type !== "vegetable") nativeEvent.dataTransfer.dropEffect = "none";
+}
+
 // ── Global event log ──
 const eventLog = ref([]);
 const MAX_LOG = 10;
@@ -454,7 +492,84 @@ const toggleDropped = ref(null);
           <p class="section-desc">Drop zones that inspect <code>transferData</code> during <code>dragover</code> to accept or reject specific types.</p>
         </div>
         <div class="section-body">
-          <!-- Task 9 content goes here -->
+          <div class="typed-layout">
+            <!-- Source items -->
+            <div>
+              <p class="col-label">Items</p>
+              <div class="item-col">
+                <Drag
+                  v-for="item in typedItems"
+                  :key="item.id"
+                  :transfer-data="item"
+                  class="drag-item"
+                  :style="{ borderColor: item.color }"
+                  @dragstart="(d) => logEvent('dragstart', d)"
+                  @dragend="(d) => logEvent('dragend', d)"
+                >
+                  <span class="dot" :style="{ background: item.color }"></span>
+                  {{ item.label }}
+                  <span class="type-badge">{{ item.type }}</span>
+                  <template v-slot:image>
+                    <div class="drag-ghost" :style="{ background: item.color }">{{ item.label }}</div>
+                  </template>
+                </Drag>
+              </div>
+            </div>
+
+            <!-- Fruit basket -->
+            <div>
+              <p class="col-label">Fruits only</p>
+              <Drop
+                v-slot="{ transferData }"
+                class="drop-zone"
+                :class="{
+                  'over-valid':   transferData?.type === 'fruit',
+                  'over-invalid': transferData && transferData.type !== 'fruit',
+                }"
+                @dragover="guardFruits"
+                @dragenter="(d) => logEvent('dragenter', d)"
+                @dragleave="(d) => logEvent('dragleave', d)"
+                @drop="dropOnFruits"
+              >
+                <p v-if="transferData" class="drag-hint">
+                  {{ transferData.type === 'fruit' ? '✓ Drop it!' : '✗ Fruits only' }}
+                </p>
+                <p v-else-if="fruitBasket.length === 0" class="empty-hint">Drop fruits here</p>
+                <div v-for="item in fruitBasket" :key="item.id" class="drag-item" :style="{ borderColor: item.color }">
+                  <span class="dot" :style="{ background: item.color }"></span>
+                  {{ item.label }}
+                </div>
+              </Drop>
+            </div>
+
+            <!-- Veggie basket -->
+            <div>
+              <p class="col-label">Veggies only</p>
+              <Drop
+                v-slot="{ transferData }"
+                class="drop-zone"
+                :class="{
+                  'over-valid':   transferData?.type === 'vegetable',
+                  'over-invalid': transferData && transferData.type !== 'vegetable',
+                }"
+                @dragover="guardVeggies"
+                @dragenter="(d) => logEvent('dragenter', d)"
+                @dragleave="(d) => logEvent('dragleave', d)"
+                @drop="dropOnVeggies"
+              >
+                <p v-if="transferData" class="drag-hint">
+                  {{ transferData.type === 'vegetable' ? '✓ Drop it!' : '✗ Veggies only' }}
+                </p>
+                <p v-else-if="vegBasket.length === 0" class="empty-hint">Drop veggies here</p>
+                <div v-for="item in vegBasket" :key="item.id" class="drag-item" :style="{ borderColor: item.color }">
+                  <span class="dot" :style="{ background: item.color }"></span>
+                  {{ item.label }}
+                </div>
+              </Drop>
+            </div>
+          </div>
+
+          <p v-if="typedStatus" class="typed-status">{{ typedStatus }}</p>
         </div>
       </section>
 
@@ -648,4 +763,9 @@ body {
 .log-label { color: #475569; }
 .log-enter-active { transition: opacity 0.2s, transform 0.2s; }
 .log-enter-from { opacity: 0; transform: translateY(-4px); }
+
+/* ── Typed drop zones ── */
+.typed-layout { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+.type-badge { margin-left: auto; font-size: 0.7rem; font-weight: 600; padding: 1px 7px; border-radius: 999px; background: #f1f5f9; color: #64748b; }
+.typed-status { margin-top: 1rem; padding: 0.6rem 1rem; border-radius: 8px; background: #f1f5f9; color: #475569; font-size: 0.875rem; border-left: 3px solid #6366f1; }
 </style>
