@@ -9,8 +9,6 @@ const SimpleDragDrop = {
   install(Vue) {
     Vue.component("Drag", Drag);
     Vue.component("Drop", Drop);
-    Vue.component("drag", Drag);
-    Vue.component("drop", Drop);
   },
 };
 
