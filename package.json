@@ -1,16 +1,21 @@
 {
   "name": "vue3-drag-drop",
-  "description": "Simple drag and drop using native event API for Vue 3",
-  "author": "TusharJoy",
-  "version": "1.2.0",
+  "description": "Lightweight, zero-dependency Vue 3 drag and drop library using native HTML5 Drag and Drop API. Drag & Drop components for Vue 3 and Nuxt 3.",
+  "version": "1.2.1",
+  "license": "MIT",
+  "author": "Tushar Ghosh Joy <tusharghoshjoy@gmail.com> (https://www.tusharjoy.com)",
+  "homepage": "https://tusharjoy.github.io/vue3-drag-drop/",
+  "bugs": {
+    "url": "https://github.com/TusharJoy/vue3-drag-drop/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TusharJoy/vue3-drag-drop.git"
+  },
   "private": false,
   "files": [
     "dist"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/TusharJoy/vue3-drag-drop"
-  },
   "main": "./dist/vue3-drag-drop.umd.js",
   "module": "./dist/vue3-drag-drop.es.js",
   "exports": {
@@ -26,14 +31,30 @@
     "preview": "vite preview"
   },
   "keywords": [
-    "Javscript",
+    "vue",
+    "vue3",
+    "vue-drag-drop",
+    "vue3-drag-drop",
+    "drag-and-drop",
+    "drag and drop",
     "drag",
     "drop",
-    "Vue3",
-    "resize",
-    "drag&drop",
-    "plugin",
-    "Vue"
+    "draggable",
+    "vue-draggable",
+    "vuedraggable",
+    "dnd",
+    "vue-dnd",
+    "vue3-dnd",
+    "html5-drag-and-drop",
+    "native-drag-drop",
+    "composition-api",
+    "vue-component",
+    "drag-drop",
+    "nuxt",
+    "nuxt3",
+    "sortable",
+    "kanban",
+    "touch-friendly"
   ],
   "peerDependencies": {
     "vue": "^3.2.45"

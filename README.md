@@ -1,16 +1,31 @@
-# vue3-drag-drop
+# Vue 3 Drag and Drop — `vue3-drag-drop`
 
-Simple, lightweight drag and drop for Vue 3 using the native HTML Drag and Drop API.
+> Simple, lightweight, zero-dependency HTML5 drag and drop library for Vue 3 and Nuxt 3.
 
-[![npm](https://img.shields.io/npm/v/vue3-drag-drop.svg)](https://www.npmjs.com/package/vue3-drag-drop)
-[![license](https://img.shields.io/npm/l/vue3-drag-drop.svg)](https://github.com/TusharJoy/vue3-drag-drop/blob/main/LICENSE)
+[![npm version](https://img.shields.io/npm/v/vue3-drag-drop.svg?style=flat-square)](https://www.npmjs.com/package/vue3-drag-drop)
+[![npm downloads](https://img.shields.io/npm/dm/vue3-drag-drop.svg?style=flat-square)](https://www.npmjs.com/package/vue3-drag-drop)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/vue3-drag-drop?style=flat-square)](https://bundlephobia.com/package/vue3-drag-drop)
+[![license](https://img.shields.io/npm/l/vue3-drag-drop.svg?style=flat-square)](https://github.com/TusharJoy/vue3-drag-drop/blob/main/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/TusharJoy/vue3-drag-drop?style=flat-square)](https://github.com/TusharJoy/vue3-drag-drop)
 
-**[Open in StackBlitz →](https://stackblitz.com/github/TusharJoy/vue3-drag-drop)**
+[**Live Interactive Demo →**](https://tusharjoy.github.io/vue3-drag-drop/) &nbsp;|&nbsp; [**Open in StackBlitz →**](https://stackblitz.com/github/TusharJoy/vue3-drag-drop)
 
-**[Live Demo →] (https://tusharjoy.github.io/vue3-drag-drop/)**
+---
+
+## Key Features
+
+- ⚡ **Zero Dependencies & Ultra-lightweight** (< 2 kB gzipped) — a modern, lightweight alternative to heavy libraries like SortableJS and vuedraggable.
+- 🎯 **Native HTML5 Drag & Drop API** with consistent, reliable cross-browser behavior.
+- 📦 **First-Class Vue 3 & Nuxt 3 Support** — works out-of-the-box with Composition API (`<script setup>`) and Options API.
+- 🔄 **Direct Object Transfer** — pass complex JavaScript objects and arrays seamlessly without manual JSON serialization.
+- 🖼️ **Custom Drag Images & Ghosts** via slots or image URLs.
+- 📱 **Mobile & Touch Compatible** — built-in touch polyfill ensures drag and drop works on touchscreens and mobile devices.
+
+---
 
 ## Table of Contents
 
+- [Key Features](#key-features)
 - [Why](#why)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
@@ -39,6 +54,16 @@ The native HTML Drag and Drop API has a few painful quirks:
 - Every drop target needs `event.preventDefault()` on `dragover` or drops silently fail.
 
 This package wraps those rough edges so you can focus on your app.
+
+### Comparison: Why choose `vue3-drag-drop`?
+
+| Feature | `vue3-drag-drop` | `vuedraggable` / SortableJS | `@vueuse/gesture` |
+|---|---|---|---|
+| **Bundle Size (Gzipped)** | **< 2 kB** | ~35 kB | ~15 kB |
+| **External Dependencies** | **0 (Zero)** | Multiple | Multiple |
+| **API Philosophy** | Declarative `<Drag>` & `<Drop>` components | DOM list reordering wrapper | Low-level gesture hooks |
+| **Data Transfer** | Any JS object/array | Array reordering only | Raw pointer coordinates |
+| **Vue 3 & Nuxt 3 Native** | ✅ Built specifically for Vue 3 | ⚠️ Vue 3 port of legacy wrapper | ✅ |
 
 ---
 
