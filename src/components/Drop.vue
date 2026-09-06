@@ -1,12 +1,13 @@
 <template>
   <component
     :is="tag"
+    :class="[isDraggingOver && activeClass]"
     @dragenter="emitEvent(events.dragenter, $event)"
     @dragleave="emitEvent(events.dragleave, $event)"
     @dragover.prevent="emitEvent(events.dragover, $event)"
     @drop.prevent="emitEvent(events.drop, $event)"
   >
-    <slot :transfer-data="scopedData"></slot>
+    <slot :transfer-data="scopedData" :is-over="isDraggingOver"></slot>
   </component>
 </template>
 
@@ -20,6 +21,7 @@ export default {
   },
   props: {
     tag: { type: String, default: "div" },
+    activeClass: { type: String, default: "" },
   },
   emits: events,
   computed: {

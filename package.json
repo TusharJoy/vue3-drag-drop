@@ -1,7 +1,7 @@
 {
   "name": "vue3-drag-drop",
   "description": "Lightweight, zero-dependency Vue 3 drag and drop library using native HTML5 Drag and Drop API. Drag & Drop components for Vue 3 and Nuxt 3.",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "license": "MIT",
   "author": "Tushar Ghosh Joy <tusharghoshjoy@gmail.com> (https://www.tusharjoy.com)",
   "homepage": "https://tusharjoy.github.io/vue3-drag-drop/",
@@ -13,8 +13,10 @@
     "url": "git+https://github.com/TusharJoy/vue3-drag-drop.git"
   },
   "private": false,
+  "types": "./types/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "types"
   ],
   "main": "./dist/vue3-drag-drop.umd.js",
   "module": "./dist/vue3-drag-drop.es.js",

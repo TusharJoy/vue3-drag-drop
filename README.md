@@ -132,6 +132,24 @@ A drop target. Accepts any `<Drag>`. Renders as a `<div>` by default.
 | Prop | Type | Default | Description |
 |---|---|---|---|
 | `tag` | `String` | `"div"` | HTML tag for the wrapper element |
+| `active-class` | `String` | `""` | CSS class(es) automatically applied to Drop when dragging over |
+
+---
+
+### Nuxt 3 & TypeScript
+
+`vue3-drag-drop` includes first-class TypeScript types out of the box.
+
+For **Nuxt 3**, register it via a client plugin (`plugins/vue3-drag-drop.client.ts`):
+
+```ts
+import { Drag, Drop } from "vue3-drag-drop";
+
+export default defineNuxtPlugin((nuxtApp) => {
+  nuxtApp.vueApp.component("Drag", Drag);
+  nuxtApp.vueApp.component("Drop", Drop);
+});
+```
 
 ---
 
@@ -169,12 +187,14 @@ All events receive the same two arguments:
 
 #### Default slot — `<Drag>` and `<Drop>`
 
-Scoped. The scope exposes `transferData` — the current drag's transfer data. For `<Drag>`, populated while dragging. For `<Drop>`, populated while a drag is over it.
+Scoped. The scope exposes:
+- `transferData`: The current drag's transfer data (available on `<Drag>` while dragging; available on `<Drop>` when an item is dragged over it).
+- `isOver` *(on `<Drop>`)*: Boolean flag indicating if a dragged element is currently hovering over this drop target.
 
 ```vue
-<Drop v-slot="{ transferData }">
-  <div :class="{ highlight: transferData }">
-    {{ transferData ? `Dropping: ${transferData.name}` : "Drop here" }}
+<Drop v-slot="{ transferData, isOver }" active-class="ring-2 ring-indigo-500 bg-indigo-50">
+  <div :class="{ highlight: isOver }">
+    {{ isOver ? `Dropping: ${transferData?.name}` : "Drop here" }}
   </div>
 </Drop>
 ```
